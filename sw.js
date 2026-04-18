@@ -29,16 +29,25 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('fetch', event => {
-    // Intercept fetches and serve from cache if possible
+    // Skip cross-origin requests (like the Gold API or Google Translate)
+    // Only handle requests for our own assets
+    if (!event.request.url.startsWith(self.location.origin)) {
+        return;
+    }
+
     event.respondWith(
         caches.match(event.request)
             .then(response => {
                 if (response) {
                     return response; // Cache hit
                 }
-                return fetch(event.request).catch(() => {
-                    // If network fails (offline) and NOT in cache, we could return a fallback page here if we had one.
-                    console.log('Offline and resource not cached:', event.request.url);
+                return fetch(event.request);
+            }).catch(error => {
+                console.log('Fetch failed:', error);
+                // Return a basic error response instead of undefined
+                return new Response('Network error occurred', {
+                    status: 408,
+                    headers: { 'Content-Type': 'text/plain' }
                 });
             })
     );
