@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WhatsApp Auto-Selling CRM - Aura</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        .chat-container {
+            display: flex;
+            height: 600px;
+            border: 1px solid #333;
+            border-radius: 12px;
+            overflow: hidden;
+            background: rgba(0, 0, 0, 0.3);
+        }
+        .chat-sidebar {
+            width: 300px;
+            background: rgba(255, 255, 255, 0.05);
+            border-right: 1px solid #333;
+            overflow-y: auto;
+        }
+        .chat-list-item {
+            padding: 15px;
+            border-bottom: 1px solid #222;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .chat-list-item:hover, .chat-list-item.active {
+            background: rgba(212, 175, 55, 0.1);
+            border-left: 3px solid var(--accent-gold);
+        }
+        .chat-main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: #0a0a0a;
+        }
+        .chat-header {
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border-bottom: 1px solid #333;
+        }
+        .chat-messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .bubble {
+            max-width: 70%;
+            padding: 10px 15px;
+            border-radius: 12px;
+            font-size: 0.95rem;
+            position: relative;
+        }
+        .bubble-customer {
+            background: #222;
+            align-self: flex-start;
+            border-bottom-left-radius: 2px;
+        }
+        .bubble-bot {
+            background: rgba(46, 213, 115, 0.2);
+            border: 1px solid var(--success);
+            color: #e0e0e0;
+            align-self: flex-end;
+            border-bottom-right-radius: 2px;
+        }
+        .bubble-jeweler {
+            background: rgba(212, 175, 55, 0.2);
+            border: 1px solid var(--accent-gold);
+            color: #fff;
+            align-self: flex-end;
+            border-bottom-right-radius: 2px;
+        }
+        .chat-input-area {
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border-top: 1px solid #333;
+        }
+    </style>
+
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#050505">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+</head>
+<body>
+    <div class="container animate-fadeIn">
+        <header class="header" style="margin-bottom: 20px;">
+            <a href="index.html" class="logo">Aura<span>.</span></a>
+            <nav style="display: flex; gap: 20px;">
+                <a href="jeweler.html" class="btn btn-secondary" style="border:none;">Dashboard</a>
+                <a href="leads.html" class="btn btn-secondary" style="border:none;">Leads Pipeline</a>
+            </nav>
+        </header>
+
+        <main>
+            <div class="flex justify-between items-center mb-2">
+                <h2>WhatsApp Auto-Selling System</h2>
+                <span class="badge" style="background: var(--success); padding: 5px 10px;">🟢 AI Sales Bot Active</span>
+            </div>
+            <p style="color: var(--text-secondary); margin-bottom: 24px;">Your AI agent automatically sends catalogs, answers FAQs, and books visits via WhatsApp. Intervene manually anytime.</p>
+            
+            <div class="chat-container">
+                <!-- Sidebar -->
+                <div class="chat-sidebar">
+                    <div class="chat-list-item active">
+                        <div class="flex justify-between items-center">
+                            <strong style="color: white;">Simran Kaur</strong>
+                            <span style="font-size: 0.75rem; color: var(--success);">Online</span>
+                        </div>
+                        <p style="margin: 5px 0 0 0; font-size: 0.8rem; color: var(--text-secondary);">Sent Live Catalog</p>
+                    </div>
+                    <div class="chat-list-item">
+                        <div class="flex justify-between items-center">
+                            <strong style="color: white;">Rahul Desai</strong>
+                            <span style="font-size: 0.75rem; color: #888;">2hr ago</span>
+                        </div>
+                        <p style="margin: 5px 0 0 0; font-size: 0.8rem; color: var(--text-secondary);">AI Booked Store Visit ✓</p>
+                    </div>
+                    <div class="chat-list-item">
+                        <div class="flex justify-between items-center">
+                            <strong style="color: white;">Aditi Sharma</strong>
+                            <span style="font-size: 0.75rem; color: #888;">1d ago</span>
+                        </div>
+                        <p style="margin: 5px 0 0 0; font-size: 0.8rem; color: var(--text-secondary);">Pending review details.</p>
+                    </div>
+                </div>
+
+                <!-- Main Chat -->
+                <div class="chat-main">
+                    <div class="chat-header">
+                        <h3 style="margin:0; font-size: 1.1rem; color: white;">Chat: Simran Kaur</h3>
+                        <p style="margin:0; font-size: 0.85rem; color: var(--accent-gold);">Lead Value: ₹3,50,000</p>
+                    </div>
+                    
+                    <div class="chat-messages" id="msgs">
+                        <div class="bubble bubble-customer">
+                            Hi, I saw your Instagram post about the new bridal collection. Do you have options under 4 Lakhs?
+                            <span style="display:block; text-align:right; font-size:0.7rem; color:#888; margin-top:5px;">10:02 AM</span>
+                        </div>
+                        
+                        <div class="bubble bubble-bot">
+                            <strong style="display:block; color:var(--success); font-size:0.75rem; margin-bottom:4px;">⚡ Auto-Replied by Aura AI</strong>
+                            Hello Simran! Yes, we have exactly 14 beautiful bridal sets in the ₹2.5L to ₹4L range. 
+                            <br><br>Here is a stunning 22k Gold Kundan set with today's live rate (₹6,500/g). Should I send the full catalog link or book a VIP store visit for you to try it on?
+                            <img src="https://images.unsplash.com/photo-1599643478514-4a884f1807d9?w=300" style="width:100%; border-radius:8px; margin-top:10px;">
+                            <span style="display:block; text-align:right; font-size:0.7rem; color:#888; margin-top:5px;">10:02 AM</span>
+                        </div>
+                        
+                        <div class="bubble bubble-customer">
+                            Wow, that looks perfect! Can I book a visit for tomorrow evening?
+                            <span style="display:block; text-align:right; font-size:0.7rem; color:#888; margin-top:5px;">10:15 AM</span>
+                        </div>
+
+                        <div class="bubble bubble-bot">
+                            <strong style="display:block; color:var(--success); font-size:0.75rem; margin-bottom:4px;">⚡ Auto-Replied by Aura AI</strong>
+                            Absolutely! I have penciled in a VIP Store Visit for you tomorrow at 5:00 PM. We will have the requested sets ready for you! ✨
+                            <span style="display:block; text-align:right; font-size:0.7rem; color:#888; margin-top:5px;">10:15 AM</span>
+                        </div>
+                    </div>
+
+                    <div class="chat-input-area">
+                        <div class="flex gap-4">
+                            <input type="text" id="manualText" style="flex:1; padding: 10px; border-radius: 8px; border: 1px solid #333; background: #111; color: white;" placeholder="Type here to override AI and reply manually...">
+                            <button class="btn btn-primary" onclick="sendManualMessage()">Send</button>
+                        </div>
+                        <div class="flex gap-4 mt-2">
+                            <button class="btn btn-secondary" style="font-size:0.8rem; padding: 5px 10px;" onclick="quickSend('I will personally assist you tomorrow!')">Quick: "Personal Assistance"</button>
+                            <button class="btn btn-secondary" style="font-size:0.8rem; padding: 5px 10px;" onclick="quickSend('Here is our live navigation link.')">Quick: "Send Location Map"</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="js/app.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const role = localStorage.getItem('auth_role');
+            if(role !== 'jeweler') window.location.href = 'index.html';
+        });
+
+        const msgs = document.getElementById('msgs');
+
+        const appendMsg = (text) => {
+            const time = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            msgs.innerHTML += `
+                <div class="bubble bubble-jeweler animate-fadeIn">
+                    <strong style="display:block; color:var(--accent-gold); font-size:0.75rem; margin-bottom:4px;">👤 Sent by You (Overrode AI)</strong>
+                    ${text}
+                    <span style="display:block; text-align:right; font-size:0.7rem; color:#ccc; margin-top:5px;">${time}</span>
+                </div>
+            `;
+            msgs.scrollTop = msgs.scrollHeight;
+        }
+
+        window.sendManualMessage = () => {
+            const input = document.getElementById('manualText');
+            if(input.value.trim() !== '') {
+                appendMsg(input.value);
+                input.value = '';
+            }
+        };
+
+        window.quickSend = (text) => {
+            appendMsg(text);
+        };
+    </script>
+
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js').then(reg => {
+                    console.log('SW registered!', reg);
+                }).catch(err => console.log('SW rep failed', err));
+            });
+        }
+    </script>
+</body>
+</html>
+

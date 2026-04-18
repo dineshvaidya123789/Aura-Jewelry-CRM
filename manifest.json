@@ -1,0 +1,22 @@
+{
+    "name": "Aura Jeweler Platform",
+    "short_name": "Aura",
+    "description": "B2B and B2C Jewelry CRM & Automation Platform",
+    "start_url": "./index.html",
+    "display": "standalone",
+    "background_color": "#050505",
+    "theme_color": "#050505",
+    "orientation": "portrait-primary",
+    "icons": [
+        {
+            "src": "https://upload.wikimedia.org/wikipedia/commons/4/4e/Gold_Diamond_Ring.png",
+            "type": "image/png",
+            "sizes": "192x192"
+        },
+        {
+            "src": "https://upload.wikimedia.org/wikipedia/commons/4/4e/Gold_Diamond_Ring.png",
+            "type": "image/png",
+            "sizes": "512x512"
+        }
+    ]
+}

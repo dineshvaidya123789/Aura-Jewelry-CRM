@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Curated Lookbook - Aura Luxury</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        body {
+            background: #050505;
+            color: white;
+            padding: 0;
+            margin: 0;
+            overflow-x: hidden;
+        }
+        .hero-banner {
+            height: 40vh;
+            background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.8)), url('https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?auto=format&fit=crop&q=80&w=1000');
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 20px;
+        }
+        .hero-banner h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5rem;
+            margin: 0;
+            color: var(--accent-gold);
+        }
+        .lookbook-container {
+            padding: 30px 20px;
+        }
+        .product-scroller {
+            display: flex;
+            overflow-x: auto;
+            gap: 20px;
+            padding-bottom: 20px;
+            scroll-snap-type: x mandatory;
+            -webkit-overflow-scrolling: touch;
+        }
+        .product-scroller::-webkit-scrollbar { display: none; }
+        
+        .lb-card {
+            flex: 0 0 85%;
+            scroll-snap-align: center;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(212,175,55,0.1);
+            border-radius: 15px;
+            padding: 20px;
+            position: relative;
+        }
+        .lb-image {
+            height: 250px;
+            background: rgba(0,0,0,0.5);
+            border-radius: 10px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 4rem;
+        }
+        .price-tag {
+            font-size: 1.5rem;
+            color: var(--accent-gold);
+            font-weight: 600;
+        }
+        .buy-btn {
+            background: var(--accent-gold);
+            color: black;
+            width: 100%;
+            padding: 15px;
+            border-radius: 8px;
+            border: none;
+            font-weight: bold;
+            margin-top: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="hero-banner animate-fadeIn">
+        <p style="text-transform: uppercase; letter-spacing: 3px; font-size: 0.8rem; margin-bottom: 10px; color: #888;">Exclusive Collection</p>
+        <h1>Aura Signature Pieces</h1>
+        <div style="width: 50px; height: 2px; background: var(--accent-gold); margin-top: 15px;"></div>
+    </div>
+
+    <div class="lookbook-container">
+        <p style="color: var(--text-secondary); margin-bottom: 25px;">Swipe to explore our masterfully crafted designs for this season.</p>
+        
+        <div id="lb-list" class="product-scroller">
+            <!-- Injected by JS -->
+        </div>
+
+        <div class="mt-8 text-center" style="padding: 40px 20px; border-top: 1px solid #222;">
+            <h2 style="font-family: 'Playfair Display'; color: white;">Bespoke Consultations</h2>
+            <p style="color: var(--text-secondary); font-size: 0.9rem;">Love a design but want it in 18K or Rose Gold? Chat with our master jeweler directly.</p>
+            <a href="whatsapp://send?text=Hi, I am looking for a custom jewelry design." class="btn btn-secondary mt-4" style="display:inline-block; border-color: #222;">Chat with Stylist</a>
+        </div>
+    </div>
+
+    <script src="js/app.js"></script>
+    <script>
+        const renderLookbook = () => {
+            const inv = getInventory();
+            const container = document.getElementById('lb-list');
+            
+            if(inv.length === 0) {
+                container.innerHTML = '<p>No items in lookbook today.</p>';
+                return;
+            }
+
+            inv.forEach(item => {
+                const price = calculateFinalPrice(item.weightGrams, item.marginType, item.marginValue, item.karat);
+                container.innerHTML += `
+                    <div class="lb-card glass-panel">
+                        <div class="lb-image">💍</div>
+                        <h3 style="margin: 0; font-family: 'Playfair Display'; font-size: 1.4rem;">${item.title}</h3>
+                        <p style="color: var(--text-secondary); font-size: 0.85rem; margin: 5px 0 15px 0;">${item.karat || 22}K Gold • ${item.weightGrams}g Hallmarked</p>
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <span style="font-size: 0.7rem; color: #888; display: block; text-transform: uppercase;">Estimated Price</span>
+                                <span class="price-tag">₹${price.toLocaleString('en-IN')}</span>
+                            </div>
+                            <span class="badge" style="background: rgba(46, 213, 115, 0.1); color: var(--success); border: 1px solid var(--success); font-size: 0.6rem;">AVAILABLE</span>
+                        </div>
+                        <a href="https://wa.me/?text=Hi, I am interested in the ${item.title} from your lookbook. Price: ₹${price.toLocaleString('en-IN')}" class="buy-btn">
+                            <span>💬 Inquire on WhatsApp</span>
+                        </a>
+                    </div>
+                `;
+            });
+        };
+
+        document.addEventListener('DOMContentLoaded', renderLookbook);
+    </script>
+</body>
+</html>

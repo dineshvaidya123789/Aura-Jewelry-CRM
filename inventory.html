@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auto-Pricing Inventory - Aura</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        .live-rate-badge {
+            background: rgba(212, 175, 55, 0.1);
+            border: 1px solid var(--accent-gold);
+            padding: 8px 16px;
+            border-radius: 20px;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .rate-flash {
+            animation: flashGreen 0.5s ease-in-out;
+        }
+        @keyframes flashGreen {
+            0% { background: rgba(212, 175, 55, 0.1); }
+            50% { background: rgba(46, 213, 115, 0.3); }
+            100% { background: rgba(212, 175, 55, 0.1); }
+        }
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        .table th, .table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #333;
+        }
+        .table th {
+            color: var(--text-secondary);
+            font-weight: 600;
+        }
+        .final-price {
+            color: var(--success);
+            font-weight: bold;
+        }
+
+        /* Toggle Switch for Rate Lock */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 46px;
+            height: 24px;
+        }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #333;
+            transition: .4s;
+            border-radius: 24px;
+            border: 1px solid #444;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 3px;
+            bottom: 3px;
+            background-color: var(--text-secondary);
+            transition: .4s;
+            border-radius: 50%;
+        }
+        input:checked + .slider { background-color: rgba(251, 207, 51, 0.2); border-color: var(--accent-gold); }
+        input:checked + .slider:before { transform: translateX(22px); background-color: var(--accent-gold); }
+
+        /* Sharing Modal */
+        #shareModal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        .share-card {
+            background: #111;
+            border: 1px solid var(--accent-gold);
+            padding: 30px;
+            border-radius: 12px;
+            max-width: 450px;
+            width: 90%;
+            position: relative;
+        }
+    </style>
+
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#050505">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+</head>
+<body>
+    <div class="container animate-fadeIn">
+        <header class="header">
+            <a href="index.html" class="logo">Aura<span>.</span></a>
+            <nav style="display: flex; gap: 20px; align-items: center;">
+                <a href="jeweler.html" class="btn btn-secondary" style="border:none;">Dashboard</a>
+                <a href="leads.html" class="btn btn-secondary" style="border:none;">Leads Pipeline</a>
+                <div class="live-rate-badge" id="rate-badge">
+                    <span style="font-size: 0.8rem; color: var(--text-secondary);">LIVE 24K BASE:</span>
+                    <strong style="color: var(--accent-gold);">₹<span id="live-rate">0.00</span>/g</strong>
+                    <div style="width: 1px; height: 15px; background: #333; margin: 0 5px;"></div>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <span style="font-size: 0.7rem; color: var(--text-secondary);">RATE LOCK</span>
+                        <label class="switch">
+                            <input type="checkbox" id="rate-lock-toggle" onchange="toggleRateLock()">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                </div>
+            </nav>
+        </header>
+
+        <main>
+            <section class="mb-4">
+                <h2>💰 Smart Inventory & Auto-Pricing</h2>
+                <p style="color: var(--text-secondary);">Set your margin rules here. Final prices automatically fluctuate based on the real-time gold market rate.</p>
+                
+                <div class="card glass-panel mt-4">
+                    <h3>📦 Add Product & Margin Rule</h3>
+                    <form id="add-inventory-form" class="grid-2">
+                        <div class="input-group">
+                            <label>Product Name</label>
+                            <input type="text" id="pName" required placeholder="e.g. 24k Gold Bangle">
+                        </div>
+                        <div class="input-group">
+                            <label>Design Weight (Grams)</label>
+                            <input type="number" step="0.01" id="pWeight" required placeholder="12.5">
+                        </div>
+                        <div class="input-group">
+                            <label>Margin Rule Configuration</label>
+                            <select id="pMarginType" required>
+                                <option value="percent">Flat Percentage (%)</option>
+                                <option value="fixed">Fixed Making Charge (₹ per gram)</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <label>Margin Value</label>
+                            <input type="number" step="0.01" id="pMarginValue" required placeholder="e.g. 10 for 10% or ₹500/g">
+                        </div>
+                        <div class="input-group">
+                            <label>Gold Purity (Karat)</label>
+                            <select id="pKarat" required>
+                                <option value="22">22K (Standard Jewelry)</option>
+                                <option value="24">24K (Pure Bullion)</option>
+                                <option value="18">18K (Diamond/Stone Jewelry)</option>
+                                <option value="14">14K (Modern/Lightweight)</option>
+                                <option value="10">10K (Budget Jewelry)</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary" style="grid-column: 1/-1;">Save Product & Sync Pricing</button>
+                    </form>
+                </div>
+
+                <div class="card mt-4">
+                    <h3>📋 Live Catalog Pricing</h3>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Product</th>
+                                <th>Weight / Karat</th>
+                                <th>Margin Rule</th>
+                                <th>Auto-Calculated Price</th>
+                                <th>AI Insights & Marketing</th>
+                            </tr>
+                        </thead>
+                        <tbody id="inventory-list">
+                            <!-- Populated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="js/app.js"></script>
+    <script>
+        const formatCurrency = (num) => '₹' + num.toLocaleString('en-IN', { maximumFractionDigits: 2 });
+
+        const renderInventory = () => {
+            const inv = getInventory();
+            const list = document.getElementById('inventory-list');
+            list.innerHTML = '';
+            
+            if (inv.length === 0) {
+                list.innerHTML = '<tr><td colspan="5" class="text-center" style="color: var(--text-secondary);">No products in inventory yet. Add your first product above.</td></tr>';
+                return;
+            }
+
+            inv.forEach(item => {
+                const finalPrice = calculateFinalPrice(item.weightGrams, item.marginType, item.marginValue, item.karat);
+                const marginText = item.marginType === 'percent' ? `+ ${item.marginValue}%` : `+ ₹${item.marginValue}/g`;
+                
+                // Mock Dead Stock AI: If it's the second item, flag it as slow-moving.
+                const isDeadStock = item.id === 2;
+                const insightsHTML = isDeadStock ? 
+                    `<div style="color: var(--danger); font-size: 0.8rem; margin-bottom: 5px;">⚠️ Dead Stock (>90 days)</div>
+                     <button class="btn btn-secondary" style="font-size: 0.7rem; padding: 4px;" onclick="alert('Auto-promoted on WhatsApp with 15% discount limit.')">1-Click Discount Push</button>` 
+                    : 
+                    `<div style="color: var(--success); font-size: 0.8rem; margin-bottom: 5px;">🔥 Fast Moving</div>`;
+
+                list.innerHTML += `
+                    <tr>
+                        <td><strong>${item.title}</strong></td>
+                        <td>
+                            <div>${item.weightGrams}g</div>
+                            <div style="font-size: 0.75rem; color: var(--accent-gold);">${item.karat || 22}K Gold</div>
+                        </td>
+                        <td><span class="badge" style="background: rgba(255,255,255,0.1); color: var(--accent-gold);">${marginText}</span></td>
+                        <td class="final-price live-price-val">${formatCurrency(finalPrice)}</td>
+                        <td>
+                            ${insightsHTML}
+                            <div style="display: flex; gap: 5px; margin-top: 5px;">
+                                <button class="btn btn-primary" style="font-size: 0.65rem; padding: 4px 8px; flex: 1; display:flex; align-items:center; justify-content:center; gap:4px;" onclick="openInstaModal('${item.title}', ${finalPrice})">📸 Instagram AI</button>
+                                <button class="btn btn-secondary" style="font-size: 0.65rem; padding: 4px 8px; flex: 1; display:flex; align-items:center; justify-content:center; gap:4px; border-color: #25D366; color: #25D366;" onclick="shareToWhatsapp('${item.title}', ${finalPrice}, ${item.weightGrams})">💬 WhatsApp</button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            });
+        };
+
+        const updateLiveRateUI = () => {
+            const isLocked = localStorage.getItem('jeweler_is_rate_locked') === 'true';
+            document.getElementById('rate-lock-toggle').checked = isLocked;
+
+            const rateStr = getLiveGoldRate().toFixed(2);
+            document.getElementById('live-rate').innerText = rateStr;
+            const badge = document.getElementById('rate-badge');
+            // flash effect
+            badge.classList.remove('rate-flash');
+            void badge.offsetWidth; // trigger reflow
+            badge.classList.add('rate-flash');
+            
+            renderInventory(); // Re-render prices
+        };
+
+        // NEW: Social Share Logic
+        window.openInstaModal = (title, price) => {
+            const caption = `✨ New Arrival at Aura Jewels ✨\n\nCheckout our stunning ${title}!\n\n💰 PRICE TODAY: ₹${price.toLocaleString('en-IN')}\n👑 QUALITY: 22K Hallmarked Gold\n🚀 FAST DELIVERY AVAILABLE.\n\nDM for booking or more details! #AuraJewelry #GoldRateToday #LuxuryJewels #IndianJewellery`;
+            document.getElementById('instaCaption').value = caption;
+            document.getElementById('shareModal').style.display = 'flex';
+        };
+
+        window.copyCaption = () => {
+            const copyText = document.getElementById('instaCaption');
+            copyText.select();
+            document.execCommand('copy');
+            alert('AI Caption Copied! Open Instagram and paste it in your post.');
+            document.getElementById('shareModal').style.display = 'none';
+        }
+
+        window.shareToWhatsapp = (title, price, weight) => {
+            const liveRate = document.getElementById('live-rate').innerText;
+            const message = `*✨ Aura Jewels: Exclusive Quotation ✨*\n\n*Item:* ${title}\n*Weight:* ${weight}g\n*Live Gold Rate Today:* ₹${liveRate}/g\n\n*Total Estimated Price:* ₹${price.toLocaleString('en-IN')}\n\n_Note: Prices fluctuate with the live market._\n\nBook Your Visit Now: ${window.location.origin}/customer-login.html`;
+            const encoded = encodeURIComponent(message);
+            window.open(`https://wa.me/?text=${encoded}`, '_blank');
+        };
+
+        // Event Listeners
+        document.addEventListener('DOMContentLoaded', () => {
+            const role = localStorage.getItem('auth_role');
+            if(role !== 'jeweler') { window.location.href = 'index.html'; }
+            
+            updateLiveRateUI();
+        });
+
+        // Listen for the simulation loop inside app.js
+        document.addEventListener('goldRateChanged', () => {
+            updateLiveRateUI();
+        });
+
+        document.getElementById('add-inventory-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            addInventoryItem(
+                document.getElementById('pName').value,
+                document.getElementById('pWeight').value,
+                document.getElementById('pMarginType').value,
+                document.getElementById('pMarginValue').value,
+                document.getElementById('pKarat').value
+            );
+            e.target.reset();
+            renderInventory();
+        });
+    </script>
+
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js').then(reg => {
+                    console.log('SW registered!', reg);
+                }).catch(err => console.log('SW rep failed', err));
+            });
+        }
+    </script>
+
+    <!-- Social Share Modal -->
+    <div id="shareModal">
+        <div class="share-card glass-panel">
+            <h3 style="color: var(--accent-gold);">AI-Generated Instagram Caption</h3>
+            <p style="font-size: 0.8rem; color: var(--text-secondary);">Aura AI has generated a high-conversion caption for your post. Paste it on Instagram after uploading the image.</p>
+            <textarea id="instaCaption" rows="8" style="width: 100%; background: rgba(0,0,0,0.5); border: 1px solid #333; color: white; padding: 10px; border-radius: 8px; margin-top: 15px; font-family: inherit; font-size: 0.85rem;"></textarea>
+            <div class="flex gap-4 mt-4">
+                <button class="btn btn-primary" style="flex: 1;" onclick="copyCaption()">Copy & Open Instagram</button>
+                <button class="btn btn-secondary" style="flex: 1;" onclick="document.getElementById('shareModal').style.display='none'">Cancel</button>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+

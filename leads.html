@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ready Buyer Leads - Aura</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        .kanban-board {
+            display: flex;
+            gap: 20px;
+            overflow-x: auto;
+            padding-bottom: 20px;
+        }
+        .kanban-column {
+            flex: 1;
+            min-width: 300px;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 12px;
+            padding: 16px;
+            border: 1px solid var(--glass-border);
+        }
+        .kanban-column h3 {
+            font-size: 1.2rem;
+            color: var(--text-primary);
+            border-bottom: 2px solid var(--accent-gold);
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+        .lead-card {
+            background: var(--bg-secondary);
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            cursor: grab;
+            transition: 0.2s;
+        }
+        .lead-card:hover { border-color: var(--accent-gold); }
+        .drag-over { background: rgba(212, 175, 55, 0.05); }
+
+        .lead-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        .action-btn {
+            flex: 1;
+            padding: 8px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-align: center;
+            text-decoration: none;
+            transition: 0.2s;
+        }
+        .btn-call {
+            background: rgba(46, 213, 115, 0.1);
+            border: 1px solid var(--success);
+            color: var(--success);
+        }
+        .btn-call:hover { background: var(--success); color: black; }
+        
+        .btn-whatsapp {
+            background: rgba(37, 211, 102, 0.1);
+            border: 1px solid #25D366;
+            color: #25D366;
+        }
+        .btn-whatsapp:hover { background: #25D366; color: white; }
+
+        .speed-tag {
+            font-size: 0.7rem;
+            color: #888;
+            margin-bottom: 10px;
+            display: block;
+        }
+        .speed-urgent { color: var(--danger); font-weight: bold; animation: blink 1s infinite; }
+        @keyframes blink { 50% { opacity: 0.5; } }
+
+        /* Call Modal */
+        #callOverlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+        .call-ui {
+            animation: pulse-ring 2s infinite;
+        }
+        @keyframes pulse-ring {
+            0% { box-shadow: 0 0 0 0 rgba(46, 213, 115, 0.4); }
+            70% { box-shadow: 0 0 0 20px rgba(46, 213, 115, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(46, 213, 115, 0); }
+        }
+    </style>
+
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#050505">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+</head>
+<body>
+    <div class="container animate-fadeIn">
+        <header class="header">
+            <a href="index.html" class="logo">Aura<span>.</span></a>
+            <nav style="display: flex; gap: 20px;">
+                <a href="jeweler.html" class="btn btn-secondary" style="border:none;">Dashboard</a>
+                <a href="inventory.html" class="btn btn-secondary" style="border:none;">Pricing & Inventory</a>
+            </nav>
+        </header>
+
+        <main>
+            <section class="mb-4">
+                <h2>📈 Leads & Booked Visits Pipeline</h2>
+                <p style="color: var(--text-secondary);">Drag incoming leads through your sales funnel. Customers booking store visits automatically appear here with full intent data.</p>
+                
+                <div class="kanban-board mt-4">
+                    <!-- Column 1 -->
+                    <div class="kanban-column" id="col-inquiry" data-status="Inquiry">
+                        <h3>📥 New Inquiries</h3>
+                        <div class="leads-container" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+                    </div>
+                    
+                    <!-- Column 2 -->
+                    <div class="kanban-column" id="col-negotiation" data-status="Negotiating">
+                        <h3>🤝 Negotiating</h3>
+                        <div class="leads-container" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+                    </div>
+                    
+                    <!-- Column 3 -->
+                    <div class="kanban-column" id="col-booked" data-status="Booked">
+                        <h3>✅ Booked Store Visit</h3>
+                        <div class="leads-container" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="js/app.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const role = localStorage.getItem('auth_role');
+            if(role !== 'jeweler') window.location.href = 'index.html';
+            renderBoard();
+        });
+
+        const renderBoard = () => {
+            const leads = getLeads();
+            document.querySelectorAll('.leads-container').forEach(c => c.innerHTML = '');
+
+            leads.forEach(l => {
+                const colId = l.status === 'Inquiry' ? 'col-inquiry' : 
+                              l.status === 'Negotiating' ? 'col-negotiation' : 'col-booked';
+                
+                const col = document.getElementById(colId).querySelector('.leads-container');
+                
+                col.innerHTML += `
+                    <div class="lead-card" id="lead-${l.id}" draggable="true" ondragstart="drag(event)">
+                        <span class="speed-tag ${l.status === 'Inquiry' ? 'speed-urgent' : ''}">
+                            ⏱️ Response Time: ${l.status === 'Inquiry' ? '12s ago' : '5m ago'}
+                        </span>
+                        <div class="flex justify-between items-center mb-2">
+                            <strong style="color: var(--accent-gold); font-size: 1.1rem;">${l.customerName}</strong>
+                            <span class="badge" style="background: rgba(255,255,255,0.1)">₹${l.budget}</span>
+                        </div>
+                        <p style="margin:0; font-size: 0.9rem; color: var(--text-secondary);"><strong>Intent:</strong> ${l.intent}</p>
+                        <p style="margin:5px 0 0 0; font-size: 0.8rem; color: #888;">📅 Date desired: ${formatDate(l.date)}</p>
+                        
+                        <div class="lead-actions">
+                            <button class="action-btn btn-call" onclick="triggerCall('${l.customerName}')">📞 Call Now</button>
+                            <button class="action-btn btn-whatsapp" onclick="triggerWhatsApp('${l.customerName}')">💬 WhatsApp</button>
+                        </div>
+                    </div>
+                `;
+            });
+        };
+
+        const triggerCall = (name) => {
+            const overlay = document.getElementById('callOverlay');
+            document.getElementById('calling-name').innerText = name;
+            overlay.style.display = 'flex';
+            
+            // Auto close after 5 seconds to simulate a connection
+            setTimeout(() => {
+                overlay.style.display = 'none';
+                alert('Connected to ' + name + '! Line is live.');
+            }, 3000);
+        }
+
+        const triggerWhatsApp = (name) => {
+            alert('Opening encrypted WhatsApp thread with ' + name + '...');
+        }
+
+        // Drag & Drop Handlers
+        let draggedLeadId = null;
+
+        window.allowDrop = (ev) => ev.preventDefault();
+        
+        window.drag = (ev) => {
+            draggedLeadId = ev.target.id.split('-')[1];
+            ev.dataTransfer.setData("text", ev.target.id);
+        };
+        
+        window.drop = (ev) => {
+            ev.preventDefault();
+            // Find the closest kanban column
+            const column = ev.target.closest('.kanban-column');
+            if(column && draggedLeadId) {
+                const newStatus = column.getAttribute('data-status');
+                updateLeadStatus(draggedLeadId, newStatus);
+                renderBoard(); // refresh
+            }
+        };
+    </script>
+
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js').then(reg => {
+                    console.log('SW registered!', reg);
+                }).catch(err => console.log('SW rep failed', err));
+            });
+        }
+    </script>
+
+    <!-- Call Simulator Overlay -->
+    <div id="callOverlay">
+        <div class="call-ui">
+            <div style="font-size: 4rem; margin-bottom: 20px;">🛡️</div>
+            <h2 style="color: white; margin-bottom: 10px;">Instant Lead Connect</h2>
+            <p style="color: var(--success); font-weight: bold; margin-bottom: 30px;">Calling <span id="calling-name"></span>...</p>
+            <div style="background: rgba(255,255,255,0.1); padding: 20px; border-radius: 50%; width: 100px; height: 100px; margin: 0 auto; display: flex; align-items: center; justify-content: center; font-size: 2rem;">📞</div>
+            <p style="margin-top: 30px; color: #888; font-size: 0.9rem;">Auto-Call System: Guaranteed < 30s connection</p>
+            <button class="btn btn-secondary mt-4" style="border-color: var(--danger); color: var(--danger);" onclick="document.getElementById('callOverlay').style.display='none'">End Call</button>
+        </div>
+    </div>
+</body>
+</html>
+

@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jeweler Login - Aura</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#050505">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+</head>
+<body>
+    <div class="container animate-fadeIn">
+        <header class="header">
+            <a href="index.html" class="logo">Aura<span>.</span></a>
+        </header>
+
+        <main style="display: flex; justify-content: center; margin-top: 5vh;">
+            <div class="card glass-panel" style="width: 100%; max-width: 400px; padding: 40px;">
+                <h2 class="text-center">Jeweler Access</h2>
+                <p class="text-center" style="color: var(--text-secondary); margin-bottom: 24px;">Login to manage your prestigious clients.</p>
+                
+                <form id="jeweler-login-form">
+                    <div class="input-group">
+                        <label>Registered Phone Number</label>
+                        <input type="tel" id="jPhone" required pattern="[0-9]{10}" title="Please enter a valid 10-digit phone number" placeholder="9876543210">
+                    </div>
+                    <div class="input-group">
+                        <label>Email Address (Optional)</label>
+                        <input type="email" id="jEmail" placeholder="admin@aura.com">
+                    </div>
+                    <div class="input-group">
+                        <label>Password</label>
+                        <input type="password" id="jPassword" required placeholder="••••••••">
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 10px;">Login to Dashboard</button>
+                </form>
+            </div>
+        </main>
+    </div>
+    <script>
+        document.getElementById('jeweler-login-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            // Since this is a UI prototype, we bypass real auth.
+            // In a real app we'd verify with our backend.
+            localStorage.setItem('auth_role', 'jeweler');
+            window.location.href = 'jeweler.html';
+        });
+    </script>
+
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js').then(reg => {
+                    console.log('SW registered!', reg);
+                }).catch(err => console.log('SW rep failed', err));
+            });
+        }
+    </script>
+</body>
+</html>
+

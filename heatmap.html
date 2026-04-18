@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Local Buyer Heatmap - Aura</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#050505">
+    <style>
+        .heatmap-container {
+            position: relative;
+            height: 500px;
+            background: linear-gradient(to bottom, #111, #0a0a0a);
+            border-radius: 12px;
+            border: 1px solid #333;
+            overflow: hidden;
+            background-image: 
+                linear-gradient(rgba(212, 175, 55, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(212, 175, 55, 0.05) 1px, transparent 1px);
+            background-size: 40px 40px;
+        }
+        
+        .radar-sweep {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 800px;
+            height: 800px;
+            margin-top: -400px;
+            margin-left: -400px;
+            background: conic-gradient(from 0deg, transparent 70%, rgba(212, 175, 55, 0.1) 100%);
+            border-radius: 50%;
+            transform-origin: center center;
+            animation: sweep 4s linear infinite;
+            pointer-events: none;
+        }
+        
+        @keyframes sweep { 100% { transform: rotate(360deg); } }
+        
+        .hot-zone {
+            position: absolute;
+            width: 25px;
+            height: 25px;
+            background: rgba(255, 71, 87, 0.8);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            box-shadow: 0 0 20px 5px rgba(255, 71, 87, 0.5);
+            animation: pulse-red 2s infinite;
+            cursor: pointer;
+        }
+        
+        .store-location {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 15px;
+            height: 15px;
+            background: var(--accent-gold);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            box-shadow: 0 0 15px 5px rgba(212, 175, 55, 0.5);
+            z-index: 10;
+        }
+
+        .store-location::after {
+            content: "Your Store";
+            position: absolute;
+            top: 20px;
+            left: -25px;
+            color: var(--accent-gold);
+            font-size: 0.75rem;
+            white-space: nowrap;
+        }
+        
+        @keyframes pulse-red {
+            0% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+            50% { transform: translate(-50%, -50%) scale(1.5); opacity: 0.6; }
+            100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+        }
+
+        .search-feed {
+            height: 500px;
+            overflow-y: hidden;
+            position: relative;
+        }
+        
+        .feed-item {
+            background: rgba(255,255,255,0.03);
+            border-left: 3px solid var(--danger);
+            padding: 12px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+            animation: slideIn 0.5s ease forwards;
+        }
+        
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container animate-fadeIn">
+        <header class="header">
+            <a href="index.html" class="logo">Aura<span>.</span></a>
+            <nav style="display: flex; gap: 20px;">
+                <a href="jeweler.html" class="btn btn-secondary" style="border:none;">Dashboard</a>
+                <a href="inventory.html" class="btn btn-secondary" style="border:none;">Pricing</a>
+                <a href="leads.html" class="btn btn-secondary" style="border:none;">Leads</a>
+            </nav>
+        </header>
+
+        <main>
+            <div class="flex justify-between items-center mb-2">
+                <h2>Local Buyer Heatmap</h2>
+                <div class="badge" style="background: var(--danger); padding: 5px 10px; display:flex; align-items:center; gap:5px;"><span class="pulse-dot" style="display:inline-block; width:8px; height:8px; background:white; border-radius:50%; animation: pulse-red 1s infinite;"></span> Radar Active</div>
+            </div>
+            <p style="color: var(--text-secondary); margin-bottom: 24px;">Stop hoping for foot traffic. Watch real-time buyer searches occurring within a 5-mile radius of your store right now.</p>
+            
+            <div class="grid-2">
+                <!-- Map UI -->
+                <div class="heatmap-container" id="map-area">
+                    <div class="radar-sweep"></div>
+                    <div class="store-location"></div>
+                    <!-- Zones injected by JS -->
+                </div>
+
+                <!-- Feed UI -->
+                <div>
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 style="margin:0;">Live Local Queries</h3>
+                        <span style="font-size: 0.8rem; color: var(--accent-gold);">Intercepting...</span>
+                    </div>
+                    <div class="search-feed" id="search-feed">
+                        <!-- Populated randomly by JS -->
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Intercept Modal -->
+    <div id="interceptModal" style="display:none; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:999; align-items:center; justify-content:center; backdrop-filter: blur(5px);">
+        <div class="card glass-panel" style="width: 100%; max-width: 450px; border: 1px solid var(--danger);">
+            <h3 style="color: var(--danger);"><span style="font-size:1.5rem;">🎯</span> Target Identified</h3>
+            <p style="color: var(--text-secondary); margin-bottom:10px;">The buyer searching for <strong id="mQuery" style="color:white;"></strong> is physically near your store.</p>
+            
+            <div style="background: rgba(251,207,51,0.05); border: 1px dashed var(--accent-gold); padding: 10px; border-radius: 8px; margin-bottom: 15px;">
+                <p style="margin:0; font-size: 0.85rem; color: var(--accent-gold); font-weight: bold;">💎 High Intent Behavior:</p>
+                <p style="margin:5px 0 0 0; font-size: 0.85rem; color: #ccc;">• Visited your site <strong>3 times</strong> today</p>
+                <p style="margin:2px 0 0 0; font-size: 0.85rem; color: #ccc;">• Viewed <strong>22K Necklace</strong> 2 mins ago</p>
+            </div>
+            
+            <p style="font-size:0.85rem; color:#888;">AI Analysis: You have 2 items in inventory matching this exact budget.</p>
+            
+            <div class="mt-4">
+                <label style="color:var(--accent-gold); font-size:0.8rem;">Auto-Generate "Bait" Message:</label>
+                <textarea rows="3" style="width:100%; padding: 10px; background:rgba(0,0,0,0.5); border:1px solid #333; color:white; border-radius:8px; font-family:inherit; margin-top:5px;">"Hi! We are just a few blocks away. We have exactly the 22K Necklace you're looking for, freshly Hallmarked. Use this link to claim a VIP 5% Walk-in Discount valid for the next 2 hours!"</textarea>
+            </div>
+            
+            <div class="flex gap-4 mt-4">
+                <button class="btn btn-primary" style="flex:1; background: var(--danger);" onclick="document.getElementById('interceptModal').style.display='none'; alert('Push notification broadcasted to device. Added to Negotiating pipeline.')">Launch Intercept Push</button>
+                <button class="btn btn-primary" style="flex:1; background: var(--success); border:none;" onclick="alert('Initiating Instant Connect Call...'); setTimeout(() => { alert('Connected! High-intent buyer is on the line.'); }, 2000);">📞 Call Now</button>
+                <button class="btn btn-secondary" style="flex:1;" onclick="document.getElementById('interceptModal').style.display='none'">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/app.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const role = localStorage.getItem('auth_role');
+            if(role !== 'jeweler') window.location.href = 'index.html';
+            
+            startHeatmapSimulation();
+        });
+
+        const phrases = [
+            "22K necklace under 50k",
+            "Best jeweler near me for diamond ring",
+            "Gold bangles making charges lowest",
+            "Sabyasachi inspired bridal set",
+            "Invest in 24k gold coin 10g",
+            "Engagement ring platinum budget 1 लाख",
+            "Where to sell old gold jewelry",
+            "Lightweight gold chain daily wear"
+        ];
+
+        const mapArea = document.getElementById('map-area');
+        const feedContainer = document.getElementById('search-feed');
+
+        const mapWidth = mapArea.offsetWidth || 500;
+        const mapHeight = 500;
+
+        const addHotZone = (query) => {
+            // Plot Random Red Zone
+            const x = Math.floor(Math.random() * (mapWidth - 50)) + 25;
+            const y = Math.floor(Math.random() * (mapHeight - 50)) + 25;
+            
+            const zone = document.createElement('div');
+            zone.className = 'hot-zone';
+            zone.style.left = x + 'px';
+            zone.style.top = y + 'px';
+            zone.onclick = () => {
+                document.getElementById('mQuery').innerText = `"${query}"`;
+                document.getElementById('interceptModal').style.display = 'flex';
+            };
+            
+            mapArea.appendChild(zone);
+            
+            // Generate Feed Event
+            const feedItem = document.createElement('div');
+            feedItem.className = 'feed-item';
+            const dist = (Math.random() * 4 + 0.5).toFixed(1); // 0.5 to 4.5 miles
+            feedItem.innerHTML = `
+                <div class="flex justify-between items-center mb-1">
+                    <strong style="color: var(--danger); font-size: 0.85rem;">Radius: ${dist} KM Away</strong>
+                    <button style="background:transparent; border:1px solid var(--danger); color:var(--danger); border-radius:4px; font-size:0.7rem; cursor:pointer;" onclick="document.getElementById('mQuery').innerText='${query}'; document.getElementById('interceptModal').style.display='flex'">Intercept</button>
+                </div>
+                <p style="margin: 0; font-size: 0.95rem;">🔍 "${query}"</p>
+                <p style="margin: 5px 0 0 0; font-size: 0.75rem; color: #888;">Device: Mobile • High Intent</p>
+            `;
+            
+            feedContainer.insertBefore(feedItem, feedContainer.firstChild);
+
+            if(feedContainer.children.length > 5) {
+                feedContainer.removeChild(feedContainer.lastChild);
+            }
+
+            // Remove map dot after 8 seconds
+            setTimeout(() => {
+                if(mapArea.contains(zone)) mapArea.removeChild(zone);
+            }, 8000);
+        };
+
+        const startHeatmapSimulation = () => {
+            // Initial burst
+            addHotZone(phrases[Math.floor(Math.random()*phrases.length)]);
+            addHotZone(phrases[Math.floor(Math.random()*phrases.length)]);
+
+            // Random polling every 3 to 6 seconds
+            setInterval(() => {
+                const randomPhrase = phrases[Math.floor(Math.random()*phrases.length)];
+                addHotZone(randomPhrase);
+            }, Math.random() * 3000 + 3000);
+        };
+    </script>
+</body>
+</html>

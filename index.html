@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aura - Jeweler & Customer App</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#050505">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+</head>
+<body>
+    <div class="container animate-fadeIn">
+        <header class="header">
+            <a href="index.html" class="logo">Aura<span>.</span></a>
+        </header>
+
+        <main style="text-align: center; margin-top: 10vh; padding-bottom: 50px;">
+            <div class="badge" style="background: rgba(212, 175, 55, 0.1); border: 1px solid var(--accent-gold); color: var(--accent-gold); margin-bottom: 15px; display: inline-block;">Beta Access Open</div>
+            <h1>Bespoke Software for Modern Jewelers</h1>
+            <p style="color: var(--text-secondary); max-width: 600px; margin: 0 auto 40px auto; font-size: 1.1rem;">
+                Aura is the world's first AI-driven CRM that turns your physical inventory into a digital sales machine. Automate WhatsApp follow-ups, capture high-margin bespoke requests, and calculate live EMI pricing instantly.
+            </p>
+            
+            <div class="grid-2 mt-4 mb-4" style="max-width: 800px; margin: 0 auto 60px auto;">
+                <div class="card glass-panel" style="padding: 30px;">
+                    <h3>For Jewelers</h3>
+                    <p style="font-size: 0.9rem; margin-bottom: 20px;">Manage leads, send WhatsApp auto-promos, and identify dead stock instantly.</p>
+                    <a href="jeweler-login.html" class="btn btn-primary" style="width: 100%;">Jeweler Platform Login</a>
+                </div>
+                
+                <div class="card glass-panel" style="padding: 30px;">
+                    <h3>For Customers</h3>
+                    <p style="font-size: 0.9rem; margin-bottom: 20px;">Experience AR trying, view live price catalogs, and book VIP store visits.</p>
+                    <a href="customer-login.html" class="btn btn-secondary" style="width: 100%;">Client Portal Access</a>
+                </div>
+            </div>
+
+            <section style="margin-top: 80px;" id="pricing">
+                <h2 style="font-size: 2.5rem; margin-bottom: 10px;">The No-Brainer Offer.</h2>
+                <p style="color: var(--text-secondary); margin-bottom: 50px; max-width: 600px; margin-inline: auto;">Features alone won't sell. Growth will. Choose the partnership structure that eliminates your risk.</p>
+
+                <div class="grid-3" style="text-align: left;">
+                    <!-- Option C: Freemium -->
+                    <div class="card glass-panel" style="position: relative;">
+                        <h3>Option C: Freemium</h3>
+                        <p style="color: var(--text-secondary); font-size: 0.9rem; min-height: 40px;">The perfect hook. Get your store online today risk-free.</p>
+                        <hr style="border:0; border-top: 1px dashed rgba(255,255,255,0.1); margin: 15px 0;">
+                        <ul style="list-style: none; padding: 0; line-height: 2;">
+                            <li><strong style="color:var(--success);">Free Forever:</strong> Live Catalog</li>
+                            <li><strong style="color:var(--accent-gold);">Paid Upgrade:</strong> Buyer Leads</li>
+                            <li><strong style="color:var(--accent-gold);">Paid Upgrade:</strong> WhatsApp Promos</li>
+                            <li><strong style="color:var(--accent-gold);">Paid Upgrade:</strong> CRM Suite</li>
+                        </ul>
+                        <button class="btn btn-secondary mt-4" style="width: 100%;">Start Free Setup</button>
+                    </div>
+
+                    <!-- Option B: Lead-Based -->
+                    <div class="card glass-panel" style="border: 1px solid var(--accent-gold); position: relative; transform: scale(1.05); z-index: 10;">
+                        <div style="position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: var(--accent-gold); color: black; padding: 2px 12px; border-radius: 12px; font-weight: bold; font-size: 0.75rem;">POPULAR</div>
+                        <h3>Option B: Lead-Based</h3>
+                        <p style="color: var(--text-secondary); font-size: 0.9rem; min-height: 40px;">Predictable foot traffic. We deliver intent-driven buyers.</p>
+                        <hr style="border:0; border-top: 1px dashed rgba(255,255,255,0.1); margin: 15px 0;">
+                        <h4 style="font-size: 1.5rem; color: white;">"We Guarantee 50 Buyer Leads/Month."</h4>
+                        <ul style="list-style: none; padding: 0; line-height: 2; margin-top: 15px;">
+                            <li>✔️ Full Platform Access</li>
+                            <li>✔️ Intent-verified walk-ins</li>
+                            <li>✔️ Automated Follow-ups</li>
+                        </ul>
+                        <button class="btn btn-primary mt-4" style="width: 100%;">Apply for Guarantee</button>
+                    </div>
+
+                    <!-- Option A: Performance -->
+                    <div class="card glass-panel" style="position: relative;">
+                        <h3>Option A: Performance</h3>
+                        <p style="color: var(--text-secondary); font-size: 0.9rem; min-height: 40px;">Zero upfront. We act as your digital franchise partner.</p>
+                        <hr style="border:0; border-top: 1px dashed rgba(255,255,255,0.1); margin: 15px 0;">
+                        <h4 style="font-size: 1.5rem; color: white;">"Pay ONLY when you get orders."</h4>
+                        <ul style="list-style: none; padding: 0; line-height: 2; margin-top: 15px;">
+                            <li>✔️ Zero setup fees</li>
+                            <li>✔️ Zero monthly retainers</li>
+                            <li>✔️ You only pay on closed sales</li>
+                        </ul>
+                        <button class="btn btn-secondary mt-4" style="width: 100%;">Partner With Us</button>
+                    </div>
+                </div>
+            </section>
+        </main>
+        
+        <footer style="text-align: center; padding: 20px; border-top: 1px solid #333; margin-top: 40px;">
+            <p style="color: var(--text-secondary); font-size: 0.8rem;">&copy; 2026 Aura SaaS. All rights reserved. | <a href="admin.html" style="color: var(--text-secondary); text-decoration: none;">Super Admin HQ</a></p>
+        </footer>
+    </div>
+
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js').then(reg => {
+                    console.log('SW registered!', reg);
+                }).catch(err => console.log('SW rep failed', err));
+            });
+        }
+    </script>
+</body>
+</html>
+

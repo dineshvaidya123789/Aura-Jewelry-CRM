@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aura SaaS - Super Admin HQ</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        body { background-color: #020202; }
+        .admin-stat {
+            background: rgba(46, 213, 115, 0.05);
+            border-left: 4px solid var(--success);
+            padding: 20px;
+            border-radius: 8px;
+        }
+        .admin-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+        .admin-table th, .admin-table td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #222;
+        }
+        .admin-table th { color: var(--text-secondary); }
+    </style>
+</head>
+<body>
+    <div class="container animate-fadeIn">
+        <header class="header">
+            <div class="logo">Aura <span>SaaS Admin</span></div>
+            <a href="index.html" class="btn btn-secondary">Exit to Public Site</a>
+        </header>
+
+        <main>
+            <div class="flex justify-between items-center mb-4">
+                <h2>Global Performance Dashboard</h2>
+                <div class="badge" style="background: rgba(212,175,55,0.1); color: var(--accent-gold); border: 1px solid var(--accent-gold); padding: 8px 16px;">
+                    MRR: ₹4,50,000 / month
+                </div>
+            </div>
+
+            <div class="grid-3 mb-4">
+                <div class="card admin-stat">
+                    <p style="color: var(--text-secondary); margin: 0;">Total Active Jewelers</p>
+                    <h3 style="color: white; font-size: 2rem; margin: 10px 0 0 0;">18</h3>
+                </div>
+                <div class="card admin-stat" style="border-left-color: var(--accent-gold); background: rgba(212,175,55,0.05);">
+                    <p style="color: var(--text-secondary); margin: 0;">Platform Leads Generated (This Month)</p>
+                    <h3 style="color: white; font-size: 2rem; margin: 10px 0 0 0;">842</h3>
+                </div>
+                <div class="card admin-stat" style="border-left-color: var(--danger); background: rgba(255,71,87,0.05);">
+                    <p style="color: var(--text-secondary); margin: 0;">Unpaid Commissions / Retainers</p>
+                    <h3 style="color: white; font-size: 2rem; margin: 10px 0 0 0;">₹42,500</h3>
+                </div>
+            </div>
+
+            <section class="card glass-panel pt-4">
+                <h3>Jeweler Franchise Accounts</h3>
+                <div style="overflow-x: auto;">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>Jeweler Brand</th>
+                                <th>Active Plan</th>
+                                <th>Performance (Leads/Sales)</th>
+                                <th>Owed to You</th>
+                                <th>Stripe Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Kalyan Mock Jeweler</strong></td>
+                                <td><span class="badge" style="background: var(--accent-gold); color: black;">Option B (Lead-Based)</span></td>
+                                <td>62 Leads Delivered</td>
+                                <td>All Paid ✅</td>
+                                <td><button class="btn btn-secondary" style="padding: 5px 10px; font-size: 0.75rem;" onclick="alert('Viewing account limits')">Manage</button></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Royal Gold Emporium</strong></td>
+                                <td><span class="badge" style="background: #333; color: white;">Option C (Freemium)</span></td>
+                                <td>0 (Catalog Only)</td>
+                                <td>₹0</td>
+                                <td><button class="btn btn-secondary" style="padding: 5px 10px; font-size: 0.75rem;" onclick="alert('Upsell sequence initiated via email.')">Push Upsell</button></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Aura Local Test</strong></td>
+                                <td><span class="badge" style="background: var(--success); color: white;">Option A (Performance Commission)</span></td>
+                                <td>₹12 Lakhs Tracked Sales</td>
+                                <td><strong style="color: var(--danger);">₹42,500 (Overdue)</strong></td>
+                                <td><button class="btn btn-primary" style="padding: 5px 10px; font-size: 0.75rem; background: var(--danger);" onclick="alert('Tenant account locked. They will see a Stripe payment gateway upon next login.')">Lock Account</button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
+    </div>
+</body>
+</html>

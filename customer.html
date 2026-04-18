@@ -1,0 +1,887 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Aura - Client Portal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        .notification-card {
+            background: rgba(255, 255, 255, 0.03);
+            border-left: 4px solid var(--accent-gold);
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 4px;
+        }
+        .type-scheme { border-color: var(--success); }
+        .type-maintenance { border-color: var(--danger); }
+        
+        .upload-area {
+            border: 2px dashed rgba(212, 175, 55, 0.5);
+            padding: 40px;
+            text-align: center;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .upload-area:hover {
+            background: rgba(212, 175, 55, 0.1);
+        }
+
+        /* Trust Booster Pack Styling */
+        .trust-kit {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 15px;
+            padding-top: 10px;
+            border-top: 1px solid rgba(255,255,255,0.05);
+        }
+        .trust-item {
+            font-size: 0.7rem;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            background: rgba(255,255,255,0.05);
+            padding: 4px 8px;
+            border-radius: 4px;
+            color: #ccc;
+        }
+        .trust-item strong { color: var(--accent-gold); }
+
+        /* Urgency & Scarcity Badges */
+        .trigger-tag {
+            font-size: 0.75rem;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: 600;
+            display: inline-block;
+            margin-bottom: 8px;
+        }
+        .tag-urgency { 
+            background: rgba(255, 71, 87, 0.1); 
+            color: var(--danger); 
+            border: 1px solid var(--danger);
+            animation: pulse-danger 2s infinite;
+        }
+        .tag-scarcity { background: rgba(251, 207, 51, 0.1); color: var(--accent-gold); border: 1px solid var(--accent-gold); }
+        .tag-interest { background: rgba(46, 213, 115, 0.1); color: var(--success); border: 1px solid var(--success); }
+
+        @keyframes pulse-danger {
+            0% { box-shadow: 0 0 0 0 rgba(255, 71, 87, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(255, 71, 87, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(255, 71, 87, 0); }
+        }
+
+        /* AI Stylist Styles */
+        .scanning-active {
+            position: relative;
+            overflow: hidden;
+        }
+        .scanning-bar {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 2px;
+            background: var(--accent-gold);
+            box-shadow: 0 0 15px var(--accent-gold);
+            animation: scanMove 2s linear infinite;
+        }
+        @keyframes scanMove {
+            0% { top: 0; }
+            50% { top: 100%; }
+            100% { top: 0; }
+        }
+        .stylist-result {
+            display: none;
+            background: rgba(212, 175, 55, 0.1);
+            border: 1px dashed var(--accent-gold);
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+    </style>
+
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#050505">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <style>
+        .cust-journey {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(251, 207, 51, 0.03);
+            border: 1px solid rgba(251, 207, 51, 0.1);
+            border-radius: 12px;
+            position: relative;
+        }
+        @keyframes shimmer-gold {
+            0% { opacity: 0.5; text-shadow: 0 0 5px var(--accent-gold); }
+            50% { opacity: 1; text-shadow: 0 0 20px var(--accent-gold); }
+            100% { opacity: 0.5; text-shadow: 0 0 5px var(--accent-gold); }
+        }
+        .moment-shimmer {
+            animation: shimmer-gold 2.5s infinite;
+            font-style: italic;
+            font-family: 'Playfair Display';
+        }
+        .step-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #222;
+            position: relative;
+            z-index: 2;
+        }
+        .step-dot.active {
+            background: var(--accent-gold);
+            box-shadow: 0 0 10px var(--accent-gold);
+        }
+        .step-dot.completed {
+            background: var(--success);
+        }
+        .step-line {
+            position: absolute;
+            top: 25px;
+            left: 10%;
+            right: 10%;
+            height: 2px;
+            background: #222;
+            z-index: 1;
+        }
+        .step-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            flex: 1;
+            z-index: 2;
+        }
+        .step-label {
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            text-align: center;
+        }
+        .step-item.active .step-label {
+            color: var(--accent-gold);
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container animate-fadeIn">
+        <header class="header">
+            <a href="index.html" class="logo">Aura<span>.</span></a>
+            <div class="flex items-center gap-4">
+                <div style="position: relative;">
+                    <span id="notif-badge" class="badge" style="position: absolute; top:-5px; right:-10px; display:none;">0</span>
+                    <span style="font-size: 1.2rem;">🔔</span>
+                </div>
+                <!-- Trust Badge -->
+                <div class="badge" style="background: rgba(46, 213, 115, 0.1); border: 1px solid var(--success); color: var(--success); display:flex; align-items:center; gap:5px;">
+                    <span style="font-size: 1rem;">🛡️</span> Aura Verified Jeweler
+                </div>
+                <span>Welcome, <strong id="user-display-name">Client</strong></span>
+                <a href="#" onclick="logout()" style="color: var(--danger); text-decoration: none; font-size: 0.9rem;">Logout</a>
+            </div>
+        </header>
+
+        <main>
+            <!-- Luxury Journey Tracker -->
+            <section id="journey-tracker" class="mb-8" style="display:none;">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 style="margin: 0; font-family: 'Playfair Display'; color: white;">✨ Your Jewelry Request Status</h3>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <div id="moment-indicator" style="width: 8px; height: 8px; background: var(--accent-gold); border-radius: 50%; display:none;"></div>
+                        <span id="concierge-message" class="moment-shimmer" style="font-size: 0.85rem; color: var(--accent-gold);">✨ Your request is being reviewed...</span>
+                    </div>
+                </div>
+                <div class="cust-journey">
+                    <div class="step-line"></div>
+                    <div id="step-1" class="step-item">
+                        <div class="step-dot"></div>
+                        <span class="step-label">Request<br>Received</span>
+                    </div>
+                    <div id="step-2" class="step-item">
+                        <div class="step-dot"></div>
+                        <span class="step-label">Being<br>Reviewed</span>
+                    </div>
+                    <div id="step-3" class="step-item">
+                        <div class="step-dot"></div>
+                        <span class="step-label">Designs<br>Prepared</span>
+                    </div>
+                    <div id="step-4" class="step-item">
+                        <div class="step-dot"></div>
+                        <span class="step-label">Consultation<br>Ready</span>
+                    </div>
+                    <div id="step-5" class="step-item">
+                        <div class="step-dot"></div>
+                        <span class="step-label">Visit<br>Scheduled</span>
+                    </div>
+                </div>
+            </section>
+
+            <div class="grid-2">
+            <!-- Aura Concierge Desk -->
+            <section class="card glass-panel" style="align-self: start;">
+                <h2>🕊️ Aura Concierge Desk</h2>
+                <div id="inbox">
+                    <p style="color: var(--text-secondary);">Your consultation log is currently silent.</p>
+                </div>
+            </section>
+
+            <!-- Aura Style Consultant -->
+            <section class="card glass-panel">
+                <h2>✨ Aura Style Consultant</h2>
+                <p style="color: var(--text-secondary);">Allow our AI consultant to curate a bespoke collection based on your unique features.</p>
+                
+                <div id="uploadBox" class="upload-area mt-4" style="border: 2px dashed #444; padding: 40px; text-align: center; border-radius: 12px; cursor: pointer; transition: 0.3s;" onmouseover="this.style.borderColor='var(--accent-gold)'" onmouseout="this.style.borderColor='#444'">
+                    <span style="font-size: 2.5rem; display: block; margin-bottom: 10px;">📸</span>
+                    <p>Upload a Selfie or Snap a Photo</p>
+                    <p style="font-size: 0.8rem; color: var(--text-secondary);">Our AI will analyze your facial features.</p>
+                    <input type="file" id="faceUpload" hidden accept="image/*">
+                </div>
+                
+                <div id="scanningUI" style="display: none; text-align: center; padding: 40px;">
+                    <div style="width: 150px; height: 180px; border: 2px solid var(--accent-gold); margin: 0 auto; position: relative;">
+                        <div class="scanning-bar"></div>
+                        <span style="position: absolute; top: 40%; left: 0; width: 100%;">SCANNING...</span>
+                    </div>
+                </div>
+
+                <div id="stylistResult" class="stylist-result">
+                    <div class="flex items-center gap-4 mb-4">
+                        <span style="font-size: 2rem;">✨</span>
+                        <div>
+                            <h3 style="margin: 0; color: white;">Analysis Complete: <span style="color: var(--accent-gold);">Oval Face</span></h3>
+                            <p style="margin: 0; font-size: 0.85rem; color: var(--text-secondary);">Match Score: 98% for Drop Earrings</p>
+                        </div>
+                    </div>
+                    <p style="font-size: 0.9rem; color: #ccc;">Based on your bone structure, longer designs will accentuate your jawline. We recommend our 22K Polki Earrings.</p>
+                    <button class="btn btn-primary mt-4" style="width: 100%;" onclick="document.getElementById('catalog-link').click()">View Curated Results</button>
+                    <a href="#catalog" id="catalog-link" style="display:none;"></a>
+                </div>
+
+                <div id="ai-loading" class="text-center mt-4" style="display:none;">
+                    <p style="color: var(--accent-gold);">✨ Aura AI is analyzing your profile...</p>
+                </div>
+
+                <div id="ai-results" class="mt-4" style="display:none;">
+                    <div style="background: rgba(0,0,0,0.5); padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                        <h4 style="margin: 0;">Analysis Profile</h4>
+                        <p style="margin: 0; color: var(--text-secondary);">Face Shape: <span id="res-face" style="color:white;"></span> | Skin Tone: <span id="res-skin" style="color:white;"></span></p>
+                    </div>
+                    <h3>Top Recommendations</h3>
+                    <div id="rec-list" class="grid-2"></div>
+                </div>
+            </section>
+            <!-- Live Catalog & EMI -->
+            <section class="card glass-panel" style="grid-column: 1 / -1;">
+                <div class="flex justify-between items-center">
+                    <h2>📖 Live Catalog & Pricing</h2>
+                    <span class="badge" style="background: rgba(212,175,55,0.1); color: var(--accent-gold); border: 1px solid var(--accent-gold);">Live Gold Rate Auto-Synced</span>
+                </div>
+                <p style="color: var(--text-secondary);">Browse our inventory with dynamically calculated live prices and EMI projections.</p>
+                <div id="customer-catalog" class="grid-3 mt-4">
+                    <!-- Populated by JS -->
+                </div>
+            </section>
+
+            <!-- Custom Jewelry Request -->
+            <section class="card glass-panel" style="grid-column: 1 / -1;">
+                <h2>🎨 Custom Jewelry Design Request</h2>
+                <p style="color: var(--text-secondary);">Can't find what you're looking for? Submit a design request and get a quote directly from your jeweler.</p>
+                <form id="custom-request-form" class="mt-4">
+                    <div class="input-group">
+                        <label>Describe your dream design (Include links to images if any)</label>
+                        <textarea id="crDesc" rows="4" required placeholder="e.g. I want a 22k gold bangle with floral diamond patterns inspired by Sabyasachi."></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Send Custom Request</button>
+                </form>
+            </section>
+
+            <!-- Book Store Visit (Intent Data) -->
+            <section class="card glass-panel" style="grid-column: 1 / -1;">
+                <h2>📍 Book a Store Visit</h2>
+                <p style="color: var(--text-secondary);">Let your jeweler know what you're looking for so they can prepare the perfect selections before you arrive.</p>
+                <form id="book-visit-form" class="grid-2 mt-4" style="max-width: 800px;">
+                    <div class="input-group">
+                        <label>What are you looking for? (Intent)</label>
+                        <select id="vIntent" required>
+                            <option value="Wedding Set">Wedding Set</option>
+                            <option value="Engagement Ring">Engagement Ring</option>
+                            <option value="Gift for Anniversary">Gift for Anniversary</option>
+                            <option value="Casual Wear / Daily Wear">Casual Wear / Daily Wear</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label>Approximate Budget</label>
+                        <select id="vBudget" required>
+                            <option value="Under ₹50,000">Under ₹50,000</option>
+                            <option value="₹50,000 - ₹2,00,000">₹50,000 - ₹2,00,000</option>
+                            <option value="₹2,00,000 - ₹5,00,000">₹2,00,000 - ₹5,00,000</option>
+                            <option value="Above ₹5,00,000">Above ₹5,00,000</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label>Preferred Date</label>
+                        <input type="date" id="vDate" required>
+                    </div>
+                    <div class="input-group" style="display: flex; align-items: flex-end;">
+                        <button type="submit" class="btn btn-primary" style="width: 100%; height: 46px;">Book Visit & Send Details</button>
+                    </div>
+                </form>
+            </section>
+        </main>
+    </div>
+
+    <script src="js/app.js"></script>
+    <script src="js/ai.js"></script>
+    <script>
+        // Render Inbox
+        const renderInbox = () => {
+            const notifications = getNotifications().reverse(); // Newest first
+            const inbox = document.getElementById('inbox');
+            const badge = document.getElementById('notif-badge');
+            
+            if (notifications.length > 0) {
+                inbox.innerHTML = '';
+                badge.style.display = 'block';
+                badge.innerText = notifications.length;
+                
+                notifications.forEach(n => {
+                    const typeClass = 'type-' + n.type;
+                    const typeLabel = n.type === 'scheme' ? 'New Offer' : n.type === 'maintenance' ? 'Service Reminder' : 'Update';
+                    
+                    let actionHtml = '';
+                    if (n.requirePaymentForReqId) {
+                        actionHtml = `<button class="btn btn-primary mt-2" onclick="openStripeMock(${n.requirePaymentForReqId})" style="width: 100%; background: #1a1a1a; border: 1px solid var(--accent-gold); color: white; display: flex; align-items: center; justify-content: center; gap: 8px;">🔒 Pay Secure Deposit via Stripe</button>`;
+                    }
+                    
+                    inbox.innerHTML += `
+                        <div class="notification-card ${typeClass}">
+                            <div class="flex justify-between items-center mb-2">
+                                <strong style="color: white; font-size: 0.9rem;">${typeLabel}</strong>
+                                <span style="font-size: 0.75rem; color: #888;">${formatDate(n.date)}</span>
+                            </div>
+                            <p style="margin: 0; font-size: 0.95rem;">${n.message}</p>
+                            ${actionHtml}
+                        </div>
+                    `;
+                });
+            }
+        };
+
+        // AI Upload Logic
+        const uploadBox = document.getElementById('uploadBox');
+        const fileInput = document.getElementById('imageInput');
+        
+        uploadBox.addEventListener('click', () => fileInput.click());
+        
+        fileInput.addEventListener('change', (e) => {
+            if(e.target.files.length > 0) {
+                uploadBox.style.display = 'none';
+                document.getElementById('ai-loading').style.display = 'block';
+                
+                // Trigger Mock AI
+                analyzeFaceAndSuggest('dummySrc', (data) => {
+                    document.getElementById('ai-loading').style.display = 'none';
+                    const resDiv = document.getElementById('ai-results');
+                    resDiv.style.display = 'block';
+                    
+                    document.getElementById('res-face').innerText = data.faceShape;
+                    document.getElementById('res-skin').innerText = data.skinTone;
+                    
+                    const recList = document.getElementById('rec-list');
+                    recList.innerHTML = '';
+                    data.recommendations.forEach(r => {
+                        recList.innerHTML += `
+                            <div class="card glass-panel" style="padding: 10px; position:relative;">
+                                <div style="position:absolute; top: 15px; right: 15px; background: rgba(0,0,0,0.7); color: var(--accent-gold); padding: 4px 8px; border-radius: 4px; font-size: 0.7rem; border: 1px solid var(--accent-gold);">Live AR Try-On ✨</div>
+                                <img src="${r.image}" alt="${r.title}" style="width: 100%; height: 180px; object-fit: cover; border-radius: 8px; margin-bottom: 10px;">
+                                <h4 style="margin: 0; font-size: 1rem;">${r.title}</h4>
+                                <p style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 5px;">${r.desc}</p>
+                                <button class="btn btn-primary" onclick="openARView()" style="width: 100%; padding: 6px; font-size:0.8rem; margin-top: 10px;">Enable Camera for Try-On</button>
+                            </div>
+                        `;
+                    });
+                });
+            }
+        });
+
+        // AI Style Assistant Logic
+        document.getElementById('uploadBox').addEventListener('click', () => {
+            document.getElementById('faceUpload').click();
+        });
+
+        document.getElementById('faceUpload').addEventListener('change', function(e) {
+            if (this.files && this.files[0]) {
+                document.getElementById('uploadBox').style.display = 'none';
+                const scanUI = document.getElementById('scanningUI');
+                scanUI.style.display = 'block';
+
+                setTimeout(() => {
+                    scanUI.style.display = 'none';
+                    document.getElementById('stylistResult').style.display = 'block';
+                }, 3000); // 3 seconds of "AI Processing"
+            }
+        });
+
+        // Book Store Visit Logic
+        document.getElementById('book-visit-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const custId = localStorage.getItem('auth_customer_id');
+            const custName = localStorage.getItem('auth_customer_name');
+            
+            addLead(
+                custId,
+                custName,
+                document.getElementById('vIntent').value,
+                document.getElementById('vBudget').value,
+                document.getElementById('vDate').value
+            );
+            
+            e.target.reset();
+            alert('Your visit has been booked! The jeweler has received your preferences and budget.');
+        });
+
+        const renderCatalog = () => {
+            const inv = getInventory();
+            const list = document.getElementById('customer-catalog');
+            list.innerHTML = '';
+            
+            if (inv.length === 0) {
+                list.innerHTML = '<p style="color: var(--text-secondary); width: 100%; grid-column: 1/-1;">Your jeweler is currently updating their catalog. Check back soon for beautiful designs!</p>';
+                return;
+            }
+
+            inv.forEach((item, index) => {
+                const finalPrice = calculateFinalPrice(item.weightGrams, item.marginType, item.marginValue, item.karat);
+                // Fake EMI: assume 12 months at 20% down
+                const monthlyEmi = ((finalPrice * 0.8) / 12).toFixed(0);
+                
+                // Triggers
+                let triggerHTML = '';
+                if(index === 0) triggerHTML = `<span class="trigger-tag tag-urgency">🔥 Price dropped today!</span>`;
+                if(index === 1) triggerHTML = `<span class="trigger-tag tag-scarcity">⏳ Last piece left!</span>`;
+                if(index > 1) triggerHTML = `<span class="trigger-tag tag-interest">👀 You've viewed this 3 times</span>`;
+
+                list.innerHTML += `
+                    <div class="card glass-panel" style="padding: 15px; border: 1px solid var(--glass-border);">
+                        ${triggerHTML}
+                        <div style="height: 120px; background: rgba(0,0,0,0.5); border-radius: 8px; margin-bottom: 15px; display:flex; align-items:center; justify-content:center;">
+                            <span style="font-size: 2rem;">💍</span>
+                        </div>
+                        <h4 style="margin: 0; font-size: 1.1rem; color: white;">${item.title}</h4>
+                        <div class="flex justify-between items-center mt-2">
+                            <span style="color: var(--text-secondary); font-size: 0.9rem;">${item.weightGrams}g | <span style="color: var(--accent-gold);">${item.karat || 22}K</span></span>
+                            <strong style="color: var(--accent-gold); font-size: 1.2rem;">₹${finalPrice.toLocaleString('en-IN', {maximumFractionDigits:0})}</strong>
+                        </div>
+                        <div style="margin-top: 10px; padding-top: 10px; border-top: 1px dashed rgba(212,175,55,0.3); text-align:center;">
+                            <p style="margin:0; font-size:0.85rem; color: var(--success);">💸 EMI starts at <strong>₹${Number(monthlyEmi).toLocaleString('en-IN')}/mo</strong></p>
+                        </div>
+                        
+                        <!-- Trust Booster Pack -->
+                        <div class="trust-kit">
+                            <div class="trust-item">⭐ <strong>4.9/5</strong> (Google)</div>
+                            <div class="trust-item">🛡️ <strong>HALLMARK</strong></div>
+                            <div class="trust-item">✅ <strong>VERIFIED</strong></div>
+                            <div class="trust-item">👥 <strong>10k+</strong> Happy Clients</div>
+                        </div>
+
+                        <button class="btn btn-secondary mt-2" style="width: 100%; border: 1px dashed var(--accent-gold); color: var(--accent-gold);" onclick="showCertificate('${item.title}', '${item.weightGrams}')">📜 View Digital Certificate</button>
+                    </div>
+                `;
+            });
+        };
+
+        // Listen for live model updates
+        document.addEventListener('goldRateChanged', renderCatalog);
+
+        // Custom Request 
+        document.getElementById('custom-request-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const custId = localStorage.getItem('auth_customer_id');
+            const custName = localStorage.getItem('auth_customer_name');
+            addCustomRequest(custId, custName, document.getElementById('crDesc').value);
+            e.target.reset();
+            alert('Your request has been sent! The jeweler will reply with a quote soon.');
+        });
+
+        // Auth Check
+        const renderJourneyTracker = () => {
+            const user = JSON.parse(localStorage.getItem('auth_user'));
+            const lead = getCustomerLead(user.id);
+            if (!lead) return;
+
+            document.getElementById('journey-tracker').style.display = 'block';
+            
+            const steps = {
+                'Captured': 1,
+                'Engaged': 2,
+                'Quoted': 3,
+                'Negotiating': 4,
+                'Scheduled': 5,
+                'Closed': 5
+            };
+            const currentStep = steps[lead.status] || 1;
+
+            for (let i = 1; i <= 5; i++) {
+                const el = document.getElementById('step-' + i);
+                const dot = el.querySelector('.step-dot');
+                if (i < currentStep) {
+                    dot.classList.add('completed');
+                } else if (i === currentStep) {
+                    dot.classList.add('active');
+                    el.classList.add('active');
+                }
+            }
+
+            // Update concierge message
+            const messages = {
+                'Captured': "✨ Request Received: We are reviewing your preferences.",
+                'Engaged': "👀 Being Reviewed by Stylist: Our expert is hand-picking designs...",
+                'Quoted': "💎 Designs Being Prepared: Exclusive curated pieces coming your way.",
+                'Negotiating': "📞 Consultation Ready: Your bespoke rates are finalized for discussion.",
+                'Scheduled': "🏬 Visit Scheduled: We look forward to seeing you at our showroom!",
+                'Closed': "✨ Selection Finalized: Thank you for choosing Aura Luxury."
+            };
+
+            // Check for recent Aura Moments (from notifications)
+            const notifs = getCustomerNotifications(user.id);
+            const latestMoment = notifs.find(n => n.type === 'moment');
+            
+            if (latestMoment) {
+                document.getElementById('concierge-message').innerText = latestMoment.msg;
+                document.getElementById('moment-indicator').style.display = 'block';
+            } else {
+                document.getElementById('concierge-message').innerText = messages[lead.status] || messages['Captured'];
+                document.getElementById('moment-indicator').style.display = 'none';
+            }
+        };
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const role = localStorage.getItem('auth_role');
+            if(role !== 'customer') {
+                window.location.href = 'customer-login.html';
+                return;
+            }
+            
+            const name = localStorage.getItem('auth_customer_name');
+            if(name) {
+                document.getElementById('user-display-name').innerText = name;
+            }
+            
+            // Set min date for "Book Visit"
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('vDate').setAttribute('min', today);
+            
+            renderInbox();
+            renderJourneyTracker();
+            renderCatalog();
+        });
+
+        window.logout = () => {
+            localStorage.removeItem('auth_role');
+            localStorage.removeItem('auth_customer_id');
+            localStorage.removeItem('auth_customer_name');
+            window.location.href = 'index.html';
+        };
+
+        const showCertificate = (title, weight) => {
+            document.getElementById('cert-title').innerText = title;
+            document.getElementById('cert-weight').innerText = weight + " Grams";
+            document.getElementById('cert-id').innerText = "AURA-" + Math.floor(Math.random() * 90000 + 10000);
+            const today = new Date().toLocaleDateString('en-IN');
+            document.getElementById('cert-date').innerText = today;
+            document.getElementById('trustModal').style.display = 'flex';
+        };
+
+        const closeCertModal = () => {
+            document.getElementById('trustModal').style.display = 'none';
+        };
+
+        let currentPaymentId = null;
+
+        const openStripeMock = (reqId) => {
+            currentPaymentId = reqId;
+            const reqs = getCustomRequests();
+            const job = reqs.find(x => x.id === parseInt(reqId));
+            if(job) {
+                document.getElementById('stripe-amount').innerText = "₹" + job.depositAmount.toLocaleString('en-IN');
+            }
+            document.getElementById('stripeModal').style.display = 'flex';
+        };
+
+        const closeStripeMock = () => {
+            document.getElementById('stripeModal').style.display = 'none';
+        };
+
+        const executePayment = () => {
+            document.getElementById('stripe-pay-btn').innerHTML = "Processing...";
+            document.getElementById('stripe-pay-btn').disabled = true;
+            
+            setTimeout(() => {
+                const success = processClientDeposit(currentPaymentId);
+                
+                if(success) {
+                    document.getElementById('stripe-content').style.display = 'none';
+                    document.getElementById('stripe-success').style.display = 'flex';
+                    
+                    setTimeout(() => {
+                        closeStripeMock();
+                        renderJourneyTracker(); // Updates the tracker 
+                        location.reload(); // Refresh to clear notification state for demo purposes
+                    }, 3000);
+                } else {
+                    alert("Payment processing error. Please contact the jeweler.");
+                    closeStripeMock();
+                }
+            }, 2500);
+        };
+
+        // AR Try-On Logic
+        const openARView = async () => {
+            const arModal = document.getElementById('arModal');
+            const video = document.getElementById('ar-video');
+            arModal.style.display = 'flex';
+            
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } });
+                video.srcObject = stream;
+            } catch(err) {
+                alert("Please allow camera access to use the Live AR Try-On.");
+                closeARView();
+            }
+        };
+
+        const closeARView = () => {
+            const video = document.getElementById('ar-video');
+            const stream = video.srcObject;
+            if(stream) {
+                stream.getTracks().forEach(track => track.stop());
+            }
+            video.srcObject = null;
+            document.getElementById('arModal').style.display = 'none';
+            document.getElementById('ar-overlay-img').style.display = 'block';
+            document.getElementById('ar-snap-success').style.display = 'none';
+        };
+
+        const snapARPhoto = () => {
+            // Flash effect
+            const modal = document.getElementById('arModal');
+            const oldBg = modal.style.background;
+            modal.style.background = 'white';
+            setTimeout(() => {
+                modal.style.background = oldBg;
+                // Show success message
+                document.getElementById('ar-overlay-img').style.display = 'none';
+                document.getElementById('ar-snap-success').style.display = 'flex';
+                
+                setTimeout(() => {
+                    closeARView();
+                }, 2500);
+            }, 100);
+        };
+    </script>
+
+    <!-- AR Virtual Try-On Modal -->
+    <div id="arModal" style="display:none; position: fixed; top:0; left:0; width:100%; height:100%; background:black; z-index:10000; flex-direction:column; align-items:center; justify-content:center;">
+        <div style="position: relative; width: 100%; height: 100vh; overflow: hidden; display: flex; align-items: center; justify-content: center;">
+            
+            <!-- Video Feed -->
+            <video id="ar-video" autoplay playsinline style="width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1);"></video>
+            
+            <!-- Necklace Overlay Mock (Gold Embellishment SVG) -->
+            <div id="ar-overlay-img" style="position: absolute; bottom: 15%; left: 50%; transform: translateX(-50%); width: 250px; height: 150px; background: url('data:image/svg+xml;utf8,<svg xmlns=\\'http://www.w3.org/2000/svg\\' viewBox=\\'0 0 100 50\\'><path d=\\'M 10 0 C 30 50, 70 50, 90 0\\' stroke=\\'%23D4AF37\\' stroke-width=\\'4\\' fill=\\'none\\'/><circle cx=\\'50\\' cy=\\'38\\' r=\\'8\\' fill=\\'%23D4AF37\\'/><circle cx=\\'30\\' cy=\\'25\\' r=\\'5\\' fill=\\'%23D4AF37\\'/><circle cx=\\'70\\' cy=\\'25\\' r=\\'5\\' fill=\\'%23D4AF37\\'/></svg>') no-repeat center center; background-size: contain; pointer-events: none; filter: drop-shadow(0px 10px 15px rgba(0,0,0,0.8));"></div>
+            
+            <!-- Safe Zone Guide -->
+            <div style="position: absolute; top: 10%; bottom: 10%; left: 10%; right: 10%; border: 2px dashed rgba(212,175,55,0.3); border-radius: 50% 50% 10% 10%; pointer-events: none; display: flex; align-items: flex-start; justify-content: center;">
+                <span style="color: rgba(255,255,255,0.7); font-size: 0.8rem; margin-top: 20px; text-transform: uppercase;">Align Face Here</span>
+            </div>
+
+            <!-- UI controls -->
+            <button onclick="closeARView()" style="position: absolute; top: 30px; left: 20px; background: rgba(0,0,0,0.5); border: 1px solid var(--accent-gold); color: white; width: 40px; height: 40px; border-radius: 50%; font-size: 1.5rem; display:flex; align-items:center; justify-content:center; cursor: pointer; z-index: 2;">&times;</button>
+            <div style="position: absolute; top: 30px; right: 20px; background: rgba(0,0,0,0.5); padding: 8px 15px; border-radius: 20px; border: 1px solid var(--accent-gold); color: var(--accent-gold); font-size: 0.8rem; z-index: 2;">✨ Aura AI Active</div>
+            
+            <button onclick="snapARPhoto()" style="position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%); width: 70px; height: 70px; border-radius: 50%; background: var(--accent-gold); border: 4px solid white; cursor: pointer; z-index: 2; box-shadow: 0 0 20px rgba(212,175,55,0.5);"></button>
+            <p style="position: absolute; bottom: 10px; width: 100%; text-align: center; color: white; font-size: 0.8rem;">Tap to Capture Try-On</p>
+            
+            <!-- Success Message Overlay -->
+            <div id="ar-snap-success" style="display:none; position: absolute; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.8); z-index: 3; flex-direction: column; align-items: center; justify-content: center; backdrop-filter: blur(5px);">
+                <span style="font-size: 4rem; color: var(--success); margin-bottom: 20px;">📸</span>
+                <h2 style="color: white; font-family: 'Playfair Display'; margin: 0;">Look Perfect.</h2>
+                <p style="color: var(--text-secondary);">Photo saved to your consultant inbox.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Digital Certificate Modal -->
+    <div id="trustModal" style="display:none; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:999; align-items:center; justify-content:center; backdrop-filter: blur(5px);">
+        <div class="card glass-panel text-center" style="width: 100%; max-width: 400px; padding: 30px; border: 2px solid var(--accent-gold); position: relative;">
+            <div style="font-size: 3rem; margin-bottom: 10px;">📜</div>
+            <h2 style="color: var(--accent-gold); margin:0;">Digital Certificate of Authenticity</h2>
+            <p style="color: var(--success); font-weight: bold; margin-bottom: 20px;">🛡️ 100% Aura Hallmarked</p>
+            
+            <div style="text-align: left; background: rgba(0,0,0,0.4); padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #333;">
+                <p style="margin: 5px 0; color: var(--text-secondary);">Item: <strong id="cert-title" style="color: white; float: right;"></strong></p>
+                <p style="margin: 5px 0; color: var(--text-secondary);">Weight: <strong id="cert-weight" style="color: white; float: right;"></strong></p>
+                <p style="margin: 5px 0; color: var(--text-secondary);">Purity: <strong style="color: white; float: right;">22K Gold (91.6%)</strong></p>
+                <hr style="border: 0; border-top: 1px dashed #444; margin: 10px 0;">
+                <p style="margin: 5px 0; color: var(--text-secondary);">Verification ID: <strong id="cert-id" style="color: var(--accent-gold); float: right;"></strong></p>
+                <p style="margin: 5px 0; color: var(--text-secondary);">Issued On: <strong id="cert-date" style="color: white; float: right;"></strong></p>
+            </div>
+            
+            <button class="btn btn-primary" style="width: 100%;" onclick="closeCertModal()">Verify & Close</button>
+        </div>
+    </div>
+    
+    <!-- Stripe Full Screen Luxury Escrow -->
+    <div id="stripeModal" style="display:none; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.98); z-index:9999; align-items:center; justify-content:center; font-family: 'Inter', sans-serif;">
+        <div id="stripe-content" style="width: 100%; max-width: 550px; background: #0a0a0a; border-radius: 16px; overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.5); border: 1px solid #333;">
+            <div style="background: linear-gradient(135deg, #111, #222); padding: 30px; text-align: center; border-bottom: 1px solid #333; position: relative;">
+                <button onclick="closeStripeMock()" style="position: absolute; top: 15px; right: 15px; background: none; border: none; color: #888; font-size: 1.5rem; cursor: pointer;">&times;</button>
+                <p style="text-transform: uppercase; letter-spacing: 2px; color: var(--accent-gold); font-size: 0.8rem; margin: 0 0 10px;">Aura Secure Escrow</p>
+                <h2 style="color: white; margin: 0; font-size: 2.5rem; font-weight: 400; font-family: 'Playfair Display';" id="stripe-amount">₹0.00</h2>
+                <p style="color: #aaa; font-size: 0.85rem; margin: 15px 0 0;">Custom Jewelry Deposit (20%)</p>
+            </div>
+            <div style="padding: 30px;">
+                <div style="display: flex; gap: 15px; mb-4; overflow-x: hidden;">
+                    <div style="flex: 1; height: 40px; background: #222; border-radius: 6px; display:flex; align-items:center; justify-content:center; border: 1px solid #444; color:white;">Apple Pay</div>
+                    <div style="flex: 1; height: 40px; background: #222; border-radius: 6px; display:flex; align-items:center; justify-content:center; border: 1px solid #444; color:white;">G Pay</div>
+                </div>
+                <div style="text-align: center; margin: 20px 0; color: #666; font-size: 0.85rem;">— Or pay with card —</div>
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; color: #aaa; font-size: 0.85rem; margin-bottom: 5px;">Email</label>
+                    <input type="text" value="client@example.com" disabled style="width: 100%; padding: 12px; background: #111; border: 1px solid #333; border-radius: 6px; color: white;">
+                </div>
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; color: #aaa; font-size: 0.85rem; margin-bottom: 5px;">Card Information</label>
+                    <div style="display:flex; border: 1px solid #333; border-radius: 6px; overflow: hidden; background: #111;">
+                        <input type="text" value="•••• •••• •••• 4242" disabled style="flex: 2; padding: 12px; background: transparent; border: none; color: white; border-right: 1px solid #333;">
+                        <input type="text" value="12/26   CVC" disabled style="flex: 1; padding: 12px; background: transparent; border: none; color: #888;">
+                    </div>
+                </div>
+                <button id="stripe-pay-btn" onclick="executePayment()" style="width: 100%; padding: 15px; background: var(--accent-gold); color: black; border: none; border-radius: 6px; font-weight: bold; font-size: 1.1rem; cursor: pointer; transition: 0.3s; font-family: 'Inter', sans-serif;">Pay Deposit</button>
+                <div style="text-align: center; margin-top: 15px; color: #555; font-size: 0.75rem; display: flex; align-items: center; justify-content: center; gap: 5px;">
+                    🔒 Payments are secure and encrypted via Stripe.
+                </div>
+            </div>
+        </div>
+        
+        <div id="stripe-success" style="display:none; flex-direction:column; align-items:center; justify-content:center; text-align:center;">
+            <div style="width: 80px; height: 80px; background: var(--success); border-radius: 50%; display: flex; align-items:center; justify-content:center; color: black; font-size: 3rem; margin-bottom: 20px; box-shadow: 0 0 30px var(--success);">✓</div>
+            <h1 style="color: white; font-family: 'Playfair Display';">Payment Successful</h1>
+            <p style="color: #aaa; max-width: 400px; line-height: 1.6;">Your deposit has been secured. Your master artisans have immediately begun work in the Atelier.</p>
+        </div>
+    </div>
+
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js').then(reg => {
+                    console.log('SW registered!', reg);
+                }).catch(err => console.log('SW rep failed', err));
+            });
+        }
+    </script>
+    <!-- Floating AI Chatbot -->
+    <button id="chatbot-launcher" onclick="toggleChat()" style="position: fixed; bottom: 30px; right: 30px; width: 60px; height: 60px; border-radius: 50%; background: linear-gradient(135deg, var(--accent-gold), #b8860b); border: none; box-shadow: 0 5px 20px rgba(212,175,55,0.4); cursor: pointer; z-index: 999; display: flex; align-items: center; justify-content: center; font-size: 2rem; transition: transform 0.3s;">✨</button>
+
+    <div id="chatbot-window" style="display: none; position: fixed; bottom: 100px; right: 30px; width: 350px; height: 500px; background: rgba(10,10,10,0.95); border: 1px solid var(--accent-gold); border-radius: 16px; box-shadow: 0 10px 40px rgba(0,0,0,0.8); z-index: 1000; flex-direction: column; overflow: hidden; backdrop-filter: blur(10px); font-family: 'Inter', sans-serif;">
+        <!-- Header -->
+        <div style="background: linear-gradient(90deg, #111, #222); padding: 15px 20px; border-bottom: 1px solid rgba(212,175,55,0.3); display: flex; justify-content: space-between; align-items: center;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <div style="width: 10px; height: 10px; background: var(--success); border-radius: 50%; box-shadow: 0 0 10px var(--success);"></div>
+                <h3 style="margin: 0; color: white; font-family: 'Playfair Display'; font-size: 1.1rem;">Aura AI Concierge</h3>
+            </div>
+            <button onclick="toggleChat()" style="background: none; border: none; color: #888; font-size: 1.2rem; cursor: pointer;">&times;</button>
+        </div>
+        
+        <!-- Messages Area -->
+        <div id="chat-messages" style="flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px;">
+            <!-- Initial Greeting -->
+            <div style="align-self: flex-start; max-width: 80%; background: rgba(255,255,255,0.05); padding: 12px 16px; border-radius: 12px 12px 12px 0; border: 1px solid #333; color: #eee; font-size: 0.9rem; line-height: 1.4;">
+                Welcome to Aura. I am your personal AI stylist and concierge. How may I assist you today?
+            </div>
+        </div>
+        
+        <!-- Input Area -->
+        <form id="chat-input-form" style="padding: 15px; border-top: 1px solid rgba(255,255,255,0.1); display: flex; gap: 10px; background: #000;">
+            <input type="text" id="chat-input" placeholder="Ask about jewelry, purity, or designs..." style="flex: 1; padding: 12px; background: #111; border: 1px solid #333; border-radius: 20px; color: white; outline: none;" required>
+            <button type="submit" style="background: var(--accent-gold); color: black; border: none; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer;">➤</button>
+        </form>
+    </div>
+
+    <script>
+        const toggleChat = () => {
+            const chatWindow = document.getElementById('chatbot-window');
+            if (chatWindow.style.display === 'none' || chatWindow.style.display === '') {
+                chatWindow.style.display = 'flex';
+                document.getElementById('chat-input').focus();
+            } else {
+                chatWindow.style.display = 'none';
+            }
+        };
+
+        const appendUserMessage = (msg) => {
+            const chat = document.getElementById('chat-messages');
+            chat.innerHTML += `
+                <div style="align-self: flex-end; max-width: 80%; background: rgba(212,175,55,0.15); padding: 12px 16px; border-radius: 12px 12px 0 12px; border: 1px dashed var(--accent-gold); color: white; font-size: 0.9rem; line-height: 1.4;">
+                    ${msg}
+                </div>
+            `;
+            chat.scrollTop = chat.scrollHeight;
+        };
+
+        const appendAIMessage = (msg) => {
+            const chat = document.getElementById('chat-messages');
+            chat.innerHTML += `
+                <div style="align-self: flex-start; max-width: 80%; background: rgba(255,255,255,0.05); padding: 12px 16px; border-radius: 12px 12px 12px 0; border: 1px solid #333; color: #eee; font-size: 0.9rem; line-height: 1.4;">
+                    ✨ ${msg}
+                </div>
+            `;
+            chat.scrollTop = chat.scrollHeight;
+        };
+
+        document.getElementById('chat-input-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const inputField = document.getElementById('chat-input');
+            const msg = inputField.value;
+            inputField.value = '';
+            
+            if(!msg.trim()) return;
+            
+            appendUserMessage(msg);
+            
+            // Show typing indicator
+            const chat = document.getElementById('chat-messages');
+            const typingId = 'typing-' + Date.now();
+            chat.innerHTML += `<div id="${typingId}" style="align-self: flex-start; color: var(--accent-gold); font-size: 0.8rem; font-style: italic;">Aura AI is thinking...</div>`;
+            chat.scrollTop = chat.scrollHeight;
+            
+            // Simple logic routing
+            setTimeout(() => {
+                document.getElementById(typingId).remove();
+                
+                const lowerMsg = msg.toLowerCase();
+                let response = "I can certainly help you with that. Would you like me to connect you with your human concierge?";
+                
+                if (lowerMsg.includes('22k') || lowerMsg.includes('gold') || lowerMsg.includes('purity')) {
+                    response = "All our gold jewelry is crafted in authentic 22K (91.6% purity) and is strictly hallmarked. We ensure maximum resale value for all our pieces.";
+                } else if (lowerMsg.includes('diamond') || lowerMsg.includes('cert') || lowerMsg.includes('vvs')) {
+                    response = "Our diamonds are exclusively VVS1 clarity and E-F color. Every diamond comes with an embedded digital IGI certificate accessible right from this portal.";
+                } else if (lowerMsg.includes('custom') || lowerMsg.includes('design') || lowerMsg.includes('make')) {
+                    response = "Aura's master artisans in Dubai can create any bespoke design you imagine. You can submit a request using the 'Custom Jewelry' section above, and we will prepare a CAD review for you.";
+                } else if (lowerMsg.includes('appointment') || lowerMsg.includes('book') || lowerMsg.includes('visit')) {
+                    response = "I would be delighted to arrange a private suite viewing for you at our flagship boutique. Please select your preferred date in the 'Book a Store Visit' section above.";
+                }
+                
+                appendAIMessage(response);
+            }, 1200);
+        });
+    </script>
+</body>
+</html>
+

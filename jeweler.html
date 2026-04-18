@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jeweler Dashboard - Aura</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#050505">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <style>
+        .journey-step {
+            flex: 1;
+            height: 4px;
+            background: #222;
+            border-radius: 2px;
+            position: relative;
+        }
+        .journey-step.active {
+            background: var(--accent-gold);
+            box-shadow: 0 0 10px var(--accent-gold);
+        }
+        .journey-step.completed {
+            background: var(--success);
+        }
+        .journey-label {
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.6rem;
+            white-space: nowrap;
+            color: #555;
+        }
+        .journey-step.active .journey-label {
+            color: var(--accent-gold);
+            font-weight: bold;
+        }
+        .journey-step.completed .journey-label {
+            color: var(--success);
+        }
+        .rev-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        .rev-card {
+            background: rgba(251, 207, 51, 0.03);
+            border: 1px solid rgba(251, 207, 51, 0.1);
+            padding: 20px;
+            border-radius: 12px;
+            position: relative;
+            overflow: hidden;
+        }
+        .rev-card::after {
+            content: '';
+            position: absolute;
+            top: 0; right: 0;
+            width: 40px; height: 40px;
+            background: radial-gradient(circle at top right, rgba(251, 207, 51, 0.1), transparent);
+        }
+        .rev-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--accent-gold);
+            display: block;
+        }
+        .rev-label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container animate-fadeIn">
+        <header class="header">
+            <a href="index.html" class="logo">Aura<span>.</span></a>
+            <nav style="display: flex; gap: 20px; flex-wrap: wrap;">
+                <a href="inventory.html" class="btn btn-secondary" style="border:none;">💰 Inventory</a>
+                <a href="leads.html" class="btn btn-secondary" style="border:none;">📊 Leads</a>
+                <a href="custom-orders.html" class="btn btn-secondary" style="border:none;">🎨 Custom</a>
+                <a href="whatsapp-crm.html" class="btn btn-secondary" style="border:none;">💬 CRM</a>
+                <a href="heatmap.html" class="btn btn-secondary" style="border:none;">🎯 Heatmap</a>
+                <a href="#wedding" class="btn-primary" style="padding: 12px; border-radius: 8px; text-decoration: none;">✨ Wedding AI</a>
+                <a href="#" onclick="logout()" class="btn-secondary" style="border:none; color: var(--danger);">🔌 Logout</a>
+            </nav>
+        </header>
+
+        <main>
+            <section id="playbook" class="mb-6">
+                <div class="card glass-panel" style="border: 1px solid var(--accent-gold); background: rgba(251, 207, 51, 0.05); padding: 15px; display: flex; align-items: center; justify-content: space-between; gap: 20px;">
+                    <div style="display: flex; align-items: center; gap: 15px;">
+                        <span id="playbook-icon" style="font-size: 2.5rem;">📖</span>
+                        <div>
+                            <h3 style="margin: 0; color: var(--accent-gold); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px;">Showroom Playbook</h3>
+                            <p id="playbook-action" style="margin: 0; font-size: 1.25rem; font-weight: bold; color: white;">Analyzing your next sales move...</p>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" style="white-space: nowrap;" onclick="scrollToSection('clients-list')">Execute Now</button>
+                </div>
+            </section>
+
+            <section id="revenue" class="mb-4">
+                <div class="rev-grid">
+                    <div class="rev-card glass-panel" style="border-left: 4px solid var(--success);">
+                        <span id="realized-val" class="rev-value">₹0.00</span>
+                        <span class="rev-label">🤝 Realized Revenue (Sold)</span>
+                    </div>
+                    <div class="rev-card glass-panel">
+                        <span id="pipeline-val" class="rev-value">₹0.00</span>
+                        <span class="rev-label">💎 Showroom Selection Value</span>
+                    </div>
+                    <div class="rev-card glass-panel">
+                        <span id="stock-gain-val" class="rev-value">₹0.00</span>
+                        <span class="rev-label">📈 Boutique Inventory Gain</span>
+                    </div>
+                    <div class="rev-card glass-panel">
+                        <span id="hot-leads-count" class="rev-value">0</span>
+                        <span class="rev-label">🔥 Open Consultations</span>
+                    </div>
+                </div>
+            </section>
+
+            <section id="crm" class="mb-4">
+                <h2>👥 Client Management</h2>
+                <div class="grid-2">
+                    <div class="card glass-panel" style="border-style: dashed; opacity: 0.9;">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 style="margin:0;">🖨️ Store-Counter QR</h3>
+                            <button class="btn btn-secondary" style="padding: 5px 10px; font-size: 0.7rem;" onclick="alert('Generating High-Res QR for your store. Customers who scan this to see live rates are automatically captured in your CRM.')">Print QR Pack</button>
+                        </div>
+                        <p style="font-size: 0.8rem; color: var(--text-secondary);">Place these QR codes on your jewelry counters. Customers scan to see "Live Prices" and are <strong>automatically captured</strong> without you typing a single word.</p>
+                        
+                        <hr style="border: 0; border-top: 1px dashed var(--accent-gold); margin: 20px 0; opacity: 0.5;">
+                        
+                        <div style="background: rgba(251, 207, 51, 0.05); border: 1px solid var(--accent-gold); border-radius: 8px; padding: 15px; text-align: center; margin-bottom: 20px;">
+                            <h4 style="margin: 0; color: var(--accent-gold); font-family: 'Playfair Display';">1-Click Walk-In Onboarding</h4>
+                            <p style="font-size: 0.8rem; color: #aaa; margin: 5px 0 10px;">AI parses Name, Phone, and Details instantly.</p>
+                            <button class="btn btn-primary" style="width: 100%; display: flex; justify-content: center; align-items: center; gap: 8px;" onclick="openScannerModal()">
+                                <span style="font-size: 1.2rem;">📸</span> Scan Client ID / Card
+                            </button>
+                        </div>
+                        
+                        <p style="font-size: 0.7rem; color: #555; text-transform: uppercase; font-weight: bold; margin-bottom: 10px; cursor: pointer;" onclick="document.getElementById('add-client-form').style.display='grid'">+ Show Manual Entry Form</p>
+                        <form id="add-client-form" style="display:none;">
+                            <div class="input-group">
+                                <label>Client Name</label>
+                                <input type="text" id="clientName" required placeholder="For phone-in leads...">
+                            </div>
+                            <div class="input-group">
+                                <label>Phone</label>
+                                <input type="tel" id="clientPhone" required pattern="[0-9]{10}" title="Please enter a valid 10-digit phone number" placeholder="9876543210">
+                            </div>
+                            <div class="input-group">
+                                <label>Email (Optional)</label>
+                                <input type="email" id="clientEmail" placeholder="client@example.com">
+                            </div>
+                            <div class="input-group">
+                                <label>Preferences</label>
+                                <input type="text" id="clientPref" placeholder="e.g. Gold Necklaces, Diamonds">
+                            </div>
+                            <div class="input-group" style="grid-column: 1/-1;">
+                                <label>Upcoming Milestone (Wedding/Anniversary)</label>
+                                <input type="date" id="clientEventDate">
+                            </div>
+                            <button type="submit" class="btn btn-primary" style="grid-column: 1/-1;">Save Client Entry</button>
+                        </form>
+                    </div>
+                    <div class="card">
+                        <h3>✨ Priority Stylist Consultations</h3>
+                        <div id="clients-list" style="max-height: 300px; overflow-y: auto;">
+                            <!-- Injected by JS -->
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- MILESTONE RADAR -->
+                <div class="card glass-panel mt-4" style="border: 1px solid var(--accent-gold); background: linear-gradient(to right, rgba(251, 207, 51, 0.05), transparent);">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 style="margin: 0; color: var(--accent-gold);">🎯 Predictive Milestone Radar</h3>
+                        <span class="badge" style="background: rgba(251, 207, 51, 0.2); color: var(--accent-gold);">AI Clienteling Engine</span>
+                    </div>
+                    <div id="milestone-list" style="display: grid; gap: 15px;">
+                        <!-- Injected by JS -->
+                    </div>
+                </div>
+            </section>
+
+            <section id="notifications" class="mb-4">
+                <div class="card glass-panel">
+                    <h2>🕊️ Aura Concierge Desk (Broadcast)</h2>
+                    <p style="color: var(--text-secondary); margin-bottom: 20px;">Send a curated notification or event reminder to all your clients.</p>
+                    <form id="notification-form">
+                        <div class="input-group">
+                            <label>Notification Type</label>
+                            <select id="notifType">
+                                <option value="scheme">New Boutique Collection</option>
+                                <option value="maintenance">Jewelry Spa/Polishing Reminder</option>
+                                <option value="system">Showroom Event Invite</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <label>Custom Message</label>
+                            <textarea id="notifMessage" rows="3" required placeholder="e.g. Bring your jewelry for a complimentary spa treatment this weekend!"></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-secondary">Broadcast to All Clients</button>
+                    </form>
+                </div>
+            </section>
+
+            <section id="trust-center" class="mb-4">
+                <div class="card glass-panel" style="border: 1px solid rgba(251, 207, 51, 0.2); background: linear-gradient(145deg, rgba(251, 207, 51, 0.05), transparent);">
+                    <div class="flex justify-between items-center mb-6">
+                        <div>
+                            <h2 style="margin: 0; color: var(--accent-gold); font-family: 'Playfair Display';">🛡️ Aura Showroom Excellence</h2>
+                            <p style="margin: 0; font-size: 0.8rem; color: var(--text-secondary);">Your Lifetime Impact & Partner Status</p>
+                        </div>
+                        <div style="text-align: right;">
+                            <span id="showroom-rank" class="badge" style="background: var(--accent-gold); color: black; font-weight: bold; padding: 5px 15px; font-size: 0.8rem;">GOLD PARTNER</span>
+                            <p id="showroom-percentile" style="margin: 5px 0 0 0; font-size: 0.7rem; color: var(--success);">Top 18% of Aura Showrooms</p>
+                        </div>
+                    </div>
+
+                    <div class="grid-3 mb-8">
+                        <div class="text-center p-4" style="border-right: 1px solid #222;">
+                            <span id="lt-leads" style="font-size: 2rem; font-weight: bold; color: white;">0</span>
+                            <p style="font-size: 0.7rem; color: var(--text-secondary); text-transform: uppercase;">Leads Generated</p>
+                        </div>
+                        <div class="text-center p-4" style="border-right: 1px solid #222;">
+                            <span id="lt-realized" style="font-size: 2rem; font-weight: bold; color: var(--success);">₹0</span>
+                            <p style="font-size: 0.7rem; color: var(--text-secondary); text-transform: uppercase;">Revenue Realized</p>
+                        </div>
+                        <div class="text-center p-4">
+                            <span id="lt-margin" style="font-size: 2rem; font-weight: bold; color: var(--accent-gold);">₹45K</span>
+                            <p style="font-size: 0.7rem; color: var(--text-secondary); text-transform: uppercase;">Margin Defended</p>
+                        </div>
+                    </div>
+
+                    <div class="flex gap-4 items-center p-4" style="background: rgba(251, 207, 51, 0.05); border-radius: 12px; border: 1px dashed var(--accent-gold);">
+                        <span style="font-size: 2.5rem;">⚙️</span>
+                        <div>
+                            <h4 style="margin: 0; color: white;">Aura Success Commitment</h4>
+                            <p style="margin: 5px 0 0 0; font-size: 0.85rem; color: #ccc; line-height: 1.4;">Aura AI is an enablement platform designed to optimize your existing sales flow. Our mission is to provide the data and coaching scripts needed for your team to perform at their highest potential.</p>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-center gap-8 mt-8 opacity-50">
+                        <div class="flex items-center gap-2">
+                            <span style="font-size: 1.2rem;">🔒</span>
+                            <span style="font-size: 0.7rem; color: white; text-transform: uppercase;">Bank-Grade Security</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span style="font-size: 1.2rem;">⚡</span>
+                            <span style="font-size: 0.7rem; color: white; text-transform: uppercase;">99.9% Uptime</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span style="font-size: 1.2rem;">🛡️</span>
+                            <span style="font-size: 0.7rem; color: white; text-transform: uppercase;">SOC2 Compliant</span>
+                        </div>
+                    </div>
+
+                    <p style="margin-top: 20px; font-size: 0.65rem; color: #444; text-align: center;">
+                        Disclaimer: Aura AI provides sales enablement tools. Final pricing, negotiation decisions, and transactional responsibility rest entirely with the showroom management.
+                    </p>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="js/app.js"></script>
+    <script src="js/ai.js"></script>
+    <script>
+        // Render Clients
+        const renderClients = () => {
+            const allClients = getCustomers();
+            const leads = getLeads();
+            
+            // Map lead status to clients for rendering
+            const activeLeads = leads.filter(l => l.status !== 'Closed');
+            
+            const list = document.getElementById('clients-list');
+            list.innerHTML = '';
+            
+            if (activeLeads.length === 0) {
+                list.innerHTML = '<p style="color: var(--text-secondary); text-align: center; padding: 20px;">Your Stylist Queue is currently empty. Capturing new requests now...</p>';
+                return;
+            }
+
+            activeLeads.forEach((l, index) => {
+                const c = allClients.find(client => client.id === l.customerId) || { name: l.customerName, phone: 'N/A', source: 'auto' };
+                const lastProduct = l.intent || 'High Purity Gold';
+                
+                // Determine Source Badge
+                const sourceBadge = c.source === 'auto' ? 
+                    `<span style="background: rgba(46, 213, 115, 0.1); color: var(--success); font-size: 0.6rem; padding: 2px 5px; border-radius: 4px; border: 1px solid var(--success); margin-left: 8px;">AUTO APP</span>` : 
+                    `<span style="background: rgba(251, 207, 51, 0.1); color: var(--accent-gold); font-size: 0.6rem; padding: 2px 5px; border-radius: 4px; border: 1px solid var(--accent-gold); margin-left: 8px;">WALK-IN</span>`;
+
+                // Handle Event Milestone
+                let eventHTML = '';
+                if(c.eventDate) {
+                    const diff = Math.ceil((new Date(c.eventDate) - new Date()) / (1000 * 60 * 60 * 24));
+                    if(diff >= 0 && diff <= 30) {
+                        eventHTML = `<div style="background: rgba(251, 207, 51, 0.2); color: var(--accent-gold); font-size: 0.75rem; padding: 6px; border-radius: 6px; margin-top: 10px; border: 1px solid var(--accent-gold);">
+                                        💍 <strong>Milestone Alert:</strong> Wedding/Event in <strong>${diff} days</strong>. Send a curation soon!
+                                     </div>`;
+                    }
+                }
+
+                let urgencyHTML = '';
+                let aiTip = '';
+                
+                if(index === 0) {
+                    urgencyHTML = `<span style="color: var(--danger); font-size: 0.75rem; font-weight: bold; animation: pulse-danger 2s infinite;">🔥 VISITED 5 TIMES TODAY</span>`;
+                    aiTip = `<div style="background: rgba(46, 213, 115, 0.1); border-left: 3px solid var(--success); padding: 8px; margin-top: 10px; font-size: 0.8rem; color: #ccc;">
+                                <strong>💡 AI Tip:</strong> Client is obsessed with the ${lastProduct}. Send a "Store-Only" voucher to close them today.
+                             </div>`;
+                }
+                if(index === 1) {
+                    urgencyHTML = `<span style="color: var(--accent-gold); font-size: 0.75rem; font-weight: bold;">💎 VIEWING HIGH-VALUE ITEMS</span>`;
+                    aiTip = `<div style="background: rgba(251, 207, 51, 0.1); border-left: 3px solid var(--accent-gold); padding: 8px; margin-top: 10px; font-size: 0.8rem; color: #ccc;">
+                                <strong>💡 AI Tip:</strong> High net worth behavioral pattern detected. Direct invite for a private VIP viewing recommended.
+                             </div>`;
+                }
+                
+                list.innerHTML += `
+                    <div class="card glass-panel" style="padding: 15px; border-bottom: 2px solid #222; margin-bottom: 10px; transition: 0.3s;" onmouseover="this.style.borderColor='var(--accent-gold)'" onmouseout="this.style.borderColor='#222'">
+                        <div class="flex justify-between items-center mb-1">
+                            <div>
+                                <strong style="font-size: 1.1rem; color: white;">${c.name}</strong>
+                                ${sourceBadge}
+                            </div>
+                            <div class="flex items-center gap-2">
+                                ${urgencyHTML}
+                                <span class="badge" style="background: var(--success); font-size: 0.65rem;">ACTIVE NOW</span>
+                            </div>
+                        </div>
+                        
+                        <div style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 5px;">
+                            <p style="margin: 0;"><span style="color: var(--accent-gold);">✨ Interest:</span> ${randomIntent}</p>
+                            <p style="margin: 3px 0 0 0;"><span style="color: var(--accent-gold);">👀 Selection Piece:</span> ${lastProduct}</p>
+                        </div>
+                        
+                        <div class="journey-container" style="display:flex; gap:10px; margin: 20px 0 30px 0; padding: 0 5px;">
+                            <div class="journey-step ${l.status === 'Captured' ? 'active' : 'completed'}">
+                                <span class="journey-label">Captured</span>
+                            </div>
+                            <div class="journey-step ${l.status === 'Engaged' ? 'active' : (['Quoted', 'Negotiating', 'Scheduled', 'Closed'].includes(l.status) ? 'completed' : '')}">
+                                <span class="journey-label">Reviewed</span>
+                            </div>
+                            <div class="journey-step ${l.status === 'Quoted' ? 'active' : (['Negotiating', 'Scheduled', 'Closed'].includes(l.status) ? 'completed' : '')}">
+                                <span class="journey-label">Designs</span>
+                            </div>
+                            <div class="journey-step ${l.status === 'Negotiating' ? 'active' : (['Scheduled', 'Closed'].includes(l.status) ? 'completed' : '')}">
+                                <span class="journey-label">Consult</span>
+                            </div>
+                            <div class="journey-step ${l.status === 'Scheduled' ? 'active' : (['Closed'].includes(l.status) ? 'completed' : '')}">
+                                <span class="journey-label">Visit</span>
+                            </div>
+                        </div>
+
+                        ${aiTip}
+                        ${eventHTML}
+
+                        <div class="flex gap-2 mt-4" style="border-top: 1px solid #222; padding-top: 15px;">
+                            <button onclick="handleWhatsAppAction(${l.id}, '${c.phone}')" class="btn btn-secondary" style="flex: 1; display:flex; flex-direction:column; align-items:center; gap:5px; border-color: #25D366; color: #25D366; padding: 10px;">
+                                <span style="font-size: 1.2rem;">💬</span> WhatsApp
+                            </button>
+                            <button onclick="alert('Calling ${c.name}...')" class="btn btn-secondary" style="flex: 1; display:flex; flex-direction:column; align-items:center; gap:5px; border-color: #007aff; color: #007aff; padding: 10px;">
+                                <span style="font-size: 1.2rem;">📞</span> Call
+                            </button>
+                            <button onclick="openCloseDealModal(${l.id}, '${c.name}', ${l.budget})" class="btn btn-primary" style="flex: 1.5; display:flex; flex-direction:column; align-items:center; gap:5px; padding: 10px; background: var(--success); border-color: var(--success);">
+                                <span style="font-size: 1.2rem;">🤝</span> Close Deal
+                            </button>
+                        </div>
+                        
+                        <div style="margin-top: 10px; display:flex; gap:10px;">
+                             <button onclick="handleAIQuoteAction(${l.id}, '${c.name}', '${lastProduct}', '${l.intent}')" class="btn btn-secondary" style="font-size: 0.7rem; padding: 4px 8px; flex:1; border-color: var(--accent-gold); color: var(--accent-gold);">🧠 AI Battle Plan</button>
+                             <button onclick="handleScheduleAction(${l.id})" class="btn btn-secondary" style="font-size: 0.7rem; padding: 4px 8px; flex:1; border-color: var(--success); color: var(--success);">🏬 Schedule Visit</button>
+                        </div>
+                    </div>
+                `;
+            });
+            });
+        };
+
+        const renderMilestones = () => {
+            const list = document.getElementById('milestone-list');
+            // Safely check if getUpcomingMilestones exists
+            const milestones = typeof getUpcomingMilestones === 'function' ? getUpcomingMilestones() : [];
+            
+            if(milestones.length === 0) {
+                list.innerHTML = '<p style="color: var(--text-secondary); font-size: 0.9rem;">No upcoming client milestones in the next 30 days.</p>';
+                return;
+            }
+            
+            list.innerHTML = '';
+            milestones.forEach(m => {
+                const draftText = `Hi ${m.name}! We saw your ${m.eventType || 'event'} is coming up in ${m.daysOut} days. Our AI Stylist curated a selection of ${m.pref || 'luxury pieces'} just for you with an exclusive rate.`;
+                list.innerHTML += `
+                    <div class="card" style="display: flex; justify-content: space-between; align-items: center; padding: 15px; background: rgba(0,0,0,0.5); border-left: 3px solid var(--accent-gold);">
+                        <div style="flex: 1; padding-right: 20px;">
+                            <strong style="color: white; font-size: 1.1rem;">${m.name}</strong> • <span style="color: var(--text-secondary);">${m.phone}</span>
+                            <p style="margin: 5px 0 0; color: #aaa; font-size: 0.85rem;">
+                                📅 <strong style="color: var(--accent-gold);">${m.eventType || 'Event'} in ${m.daysOut} days</strong> | Prefers: ${m.pref}
+                            </p>
+                            <p style="margin: 10px 0 0; font-size: 0.8rem; font-style: italic; color: #888; border-left: 2px solid #444; padding-left: 10px;">
+                                " ${draftText} "
+                            </p>
+                        </div>
+                        <button class="btn btn-primary" onclick="window.open('https://wa.me/${m.phone}?text=${encodeURIComponent(draftText)}', '_blank')" style="white-space: nowrap; font-size: 0.85rem;">💬 Send WhatsApp Script</button>
+                    </div>
+                `;
+            });
+        };
+
+        // Handle Add Client
+        document.getElementById('add-client-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            addCustomer(
+                document.getElementById('clientName').value,
+                document.getElementById('clientPhone').value,
+                document.getElementById('clientPref').value,
+                'manual',
+                document.getElementById('clientEventDate').value
+            );
+            e.target.reset();
+            renderClients();
+            alert('Manual lead logged. Remember: Customers using your PWA are captured automatically!');
+        });
+
+        const openScannerModal = () => {
+            const modal = document.getElementById('aiScannerModal');
+            modal.style.display = 'flex';
+            
+            // Mock Scanning Process
+            setTimeout(() => {
+                document.getElementById('scanOverlay').style.display = 'none';
+                document.getElementById('scanSuccess').style.display = 'block';
+                
+                // Add Priya Kapoor
+                addCustomer('Priya Kapoor', '9812233445', 'High Jewelry', 'Walk-In Auto', '2024-05-15', 'Birthday');
+                
+                setTimeout(() => {
+                    modal.style.display = 'none';
+                    document.getElementById('scanOverlay').style.display = 'block';
+                    document.getElementById('scanSuccess').style.display = 'none';
+                    renderClients();
+                    alert("Client 'Priya Kapoor' successfully digitized via OCR!");
+                }, 2000);
+            }, 3000);
+        };
+
+
+        // Handle Notifications
+        document.getElementById('notification-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            createNotification(
+                document.getElementById('notifType').value,
+                document.getElementById('notifMessage').value
+            );
+            e.target.reset();
+            alert('Notification broadcasted to clients!');
+        });
+
+        // AI Wedding
+        window.generateWeddingOptions = () => {
+            const val = document.getElementById('weddingTheme').value;
+            const resDiv = document.getElementById('wedding-results');
+            resDiv.innerHTML = '<p class="text-center w-100" style="grid-column: 1/-1;">AI is analyzing the perfect sets...</p>';
+            
+            getWeddingOptions(val, (options) => {
+                resDiv.innerHTML = '';
+                options.forEach(opt => {
+                    resDiv.innerHTML += `
+                        <div class="card glass-panel" style="padding: 15px;">
+                            <h4 style="margin:0; color: white;">${opt.title}</h4>
+                            <p style="color: var(--accent-gold); font-weight: bold;">${opt.price}</p>
+                            <p style="font-size: 0.8rem; color: var(--text-secondary);">${opt.match}</p>
+                            <button class="btn btn-secondary" style="padding: 5px 10px; font-size: 0.8rem;">Send to Client</button>
+                        </div>
+                    `;
+                });
+            });
+        };
+
+        // Negotiation Coach Logic
+        window.openCoachModal = (name, product, intent) => {
+            const modal = document.getElementById('coachModal');
+            document.getElementById('coachLeadName').innerText = name;
+            
+            let script = "";
+            if(intent.includes("Wedding")) {
+                script = `Since ${name} is wedding shopping, do NOT discount the gold price. Instead, offer a 20% discount on "Making Charges" if they book a visit today. Mention that our ${product} is a top selection for this season.`;
+            } else {
+                script = `${name} is interested in ${product}. Emphasize the "Rate Lock" feature to give them stability. Suggest a the 18K option if they are budget-sensitive, or the "Investment Scheme" to close the deal.`;
+            }
+            
+            document.getElementById('coachScript').innerText = script;
+            modal.style.display = 'flex';
+        };
+
+        // Revenue Dashboard Logic
+        const renderRevenueStats = () => {
+            const stats = getRevenueStats();
+            document.getElementById('realized-val').innerText = '₹' + (stats.realizedRevenue / 100000).toFixed(2) + 'L';
+            document.getElementById('pipeline-val').innerText = '₹' + (stats.totalPipeline / 100000).toFixed(2) + 'L';
+            document.getElementById('stock-gain-val').innerText = '₹' + stats.stockGain.toLocaleString('en-IN');
+            document.getElementById('hot-leads-count').innerText = stats.hotLeadsCount;
+            
+            // Render Playbook too (Boutique Advantage)
+            const nextMove = getShowroomNextAction();
+            document.getElementById('playbook-action').innerText = nextMove.action;
+            document.getElementById('playbook-icon').innerText = nextMove.icon;
+            
+            // Render Trust Center Stats
+            const ltStats = getLifetimeStats();
+            document.getElementById('lt-leads').innerText = ltStats.totalLeads;
+            document.getElementById('lt-realized').innerText = '₹' + (ltStats.totalRealized / 100000).toFixed(1) + 'L';
+            document.getElementById('showroom-rank').innerText = ltStats.rank;
+            document.getElementById('showroom-percentile').innerText = 'Top ' + (100 - ltStats.percentile) + '% of Aura Showrooms';
+        };
+
+        window.handleWhatsAppAction = (leadId, phone) => {
+            const leads = getLeads();
+            const l = leads.find(x => x.id === parseInt(leadId));
+            updateLeadJourneyStatus(leadId, 'Engaged');
+            if(l) triggerAuraMoment(l.customerId, 'shortlist');
+            window.open(`https://wa.me/${phone}`, '_blank');
+            renderClients();
+            renderRevenueStats();
+        };
+
+        window.handleAIQuoteAction = (leadId, name, product, intent) => {
+            const leads = getLeads();
+            const l = leads.find(x => x.id === parseInt(leadId));
+            updateLeadJourneyStatus(leadId, 'Negotiating'); // Consultation Ready
+            if(l) triggerAuraMoment(l.customerId, 'order_prep');
+            openCoachModal(name, product, intent);
+            renderClients();
+            renderRevenueStats();
+        };
+
+        window.handleScheduleAction = (leadId) => {
+            const leads = getLeads();
+            const l = leads.find(x => x.id === parseInt(leadId));
+            updateLeadJourneyStatus(leadId, 'Scheduled'); // Visit Scheduled
+            if(l) triggerAuraMoment(l.customerId, 'visit_confirm');
+            alert("Luxury Visit set for Client. They will see 'Visit Scheduled' on their dashboard.");
+            renderClients();
+            renderRevenueStats();
+        };
+
+        window.scrollToSection = (id) => {
+            document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
+        };
+
+        window.openCloseDealModal = (leadId, name, budget) => {
+            const modal = document.getElementById('closeDealModal');
+            document.getElementById('closeLeadId').value = leadId;
+            document.getElementById('closeLeadName').innerText = name;
+            document.getElementById('finalAmount').value = budget;
+            modal.style.display = 'flex';
+        };
+
+        window.submitCloseDeal = (e) => {
+            e.preventDefault();
+            const id = document.getElementById('closeLeadId').value;
+            const amount = document.getElementById('finalAmount').value;
+            markDealClosed(id, amount);
+            
+            // Victory Effect
+            document.getElementById('victory-overlay').style.display = 'block';
+            setTimeout(() => { document.getElementById('victory-overlay').style.display = 'none'; }, 2000);
+            
+            document.getElementById('closeDealModal').style.display = 'none';
+            renderRevenueStats();
+            renderClients();
+        };
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const role = localStorage.getItem('auth_role');
+            if(role !== 'jeweler') {
+                window.location.href = 'jeweler-login.html';
+                return;
+            }
+            renderRevenueStats();
+            renderClients();
+            renderMilestones();
+        });
+
+        window.logout = () => {
+            localStorage.removeItem('auth_role');
+            window.location.href = 'index.html';
+        };
+    </script>
+
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js').then(reg => {
+                    console.log('SW registered!', reg);
+                }).catch(err => console.log('SW rep failed', err));
+            });
+        }
+    </script>
+    
+    <!-- AI Coach Modal -->
+    <div id="coachModal" style="display:none; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:999; align-items:center; justify-content:center; backdrop-filter: blur(5px);">
+        <div class="card glass-panel" style="width: 100%; max-width: 500px; border: 1px solid var(--accent-gold);">
+            <h3 style="color: var(--accent-gold);"><span style="font-size:1.5rem;">🧠</span> AI Negotiation Battle Plan</h3>
+            <p style="color: var(--text-secondary); margin-bottom:15px;">Target Client: <strong id="coachLeadName" style="color:white;"></strong></p>
+            
+            <div style="background: rgba(46, 213, 115, 0.05); border-left: 4px solid var(--success); padding: 15px; border-radius: 4px;">
+                <p id="coachScript" style="margin: 0; line-height: 1.6; color: #eee; font-style: italic;">"Wait for Aura AI to analyze customer behavior..."</p>
+            </div>
+            
+            <div class="flex gap-4 mt-6">
+                <button class="btn btn-primary" style="flex:1;" onclick="document.getElementById('coachModal').style.display='none'; alert('Battle plan added to lead notes.')">Apply Plan</button>
+                <button class="btn btn-secondary" style="flex:1;" onclick="document.getElementById('coachModal').style.display='none'">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Close Deal Modal -->
+    <div id="closeDealModal" style="display:none; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:1000; align-items:center; justify-content:center;">
+        <div class="card glass-panel" style="width: 100%; max-width: 400px; border: 2px solid var(--success);">
+            <h2 style="color: var(--success); margin-top:0;">🤝 Record Success</h2>
+            <p style="color: var(--text-secondary);">Closing deal for <strong id="closeLeadName" style="color:white;"></strong></p>
+            <form onsubmit="submitCloseDeal(event)">
+                <input type="hidden" id="closeLeadId">
+                <div class="input-group">
+                    <label>Final Sale Amount (₹)</label>
+                    <input type="number" id="finalAmount" required style="font-size: 1.5rem; color: var(--success);">
+                </div>
+                <div class="input-group">
+                    <label>Payment Mode</label>
+                    <select id="payMode">
+                        <option>UPI</option>
+                        <option>Cash</option>
+                        <option>Card</option>
+                        <option>Old Gold Exchange</option>
+                    </select>
+                </div>
+                <div class="flex gap-4 mt-4">
+                    <button type="submit" class="btn btn-primary" style="flex:1; background: var(--success); border-color: var(--success);">Confirm Sale</button>
+                    <button type="button" class="btn btn-secondary" style="flex:1;" onclick="document.getElementById('closeDealModal').style.display='none'">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Victory Overlay -->
+    <div id="victory-overlay" style="display:none; position: fixed; top:0; left:0; width:100%; height:100%; z-index:9999; pointer-events:none; background: rgba(0,0,0,0.3);">
+        <div style="position: absolute; top:50%; left:50%; transform:translate(-50%, -50%); text-align:center;">
+            <h1 style="font-size: 4rem; color: var(--accent-gold); text-shadow: 0 0 20px rgba(251, 207, 51, 0.5); font-family: 'Playfair Display';">DEAL CLOSED! ✨</h1>
+            <p style="color: white; font-size: 1.5rem;">Revenue Realized.</p>
+        </div>
+    </div>
+    
+    <!-- AI Scanner Modal -->
+    <div id="aiScannerModal" style="display:none; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); z-index:2000; align-items:center; justify-content:center;">
+        <div class="card" style="width: 100%; max-width: 400px; text-align: center; position: relative;">
+            <div id="scanOverlay" style="border: 2px dashed var(--accent-gold); width: 100%; height: 250px; border-radius: 12px; position: relative; overflow: hidden; display: flex; flex-direction: column; justify-content: center; align-items: center; background: rgba(251, 207, 51, 0.05);">
+                <div style="position: absolute; top: 0; left: 0; width: 100%; height: 5px; background: var(--accent-gold); box-shadow: 0 0 15px var(--accent-gold); animation: scanMove 2s linear infinite;"></div>
+                <span style="font-size: 3rem;">📸</span>
+                <p style="color: var(--accent-gold); font-family: monospace; letter-spacing: 2px; margin-top: 10px;">OCR PARSING...</p>
+                <p style="font-size: 0.7rem; color: #888;">Hold ID Card in Frame</p>
+                <style>@keyframes scanMove { 0% { top: 0; } 50% { top: 100%; } 100% { top: 0; } }</style>
+            </div>
+            <div id="scanSuccess" style="display:none; border: 2px solid var(--success); width: 100%; height: 250px; border-radius: 12px; display: flex; flex-direction: column; justify-content: center; align-items: center; background: rgba(46, 213, 115, 0.05);">
+                <span style="font-size: 3rem;">✅</span>
+                <h3 style="color: var(--success); margin: 10px 0 0;">Profile Digitized</h3>
+                <p>Priya Kapoor</p>
+            </div>
+            <button class="btn btn-secondary mt-4" style="width:100%" onclick="document.getElementById('aiScannerModal').style.display='none'">Cancel Scan</button>
+        </div>
+    </div>
+</body>
+</html>
+

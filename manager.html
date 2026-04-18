@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aura Enterprise - CEO Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+    
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#050505">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <style>
+        .enterprise-card {
+            background: linear-gradient(145deg, rgba(20,20,20,0.8), rgba(5,5,5,0.9));
+            border: 1px solid rgba(251, 207, 51, 0.15);
+            border-top: 3px solid var(--accent-gold);
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            transition: transform 0.3s ease;
+        }
+        .enterprise-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(251, 207, 51, 0.4);
+            box-shadow: 0 15px 40px rgba(251, 207, 51, 0.1);
+        }
+        .stat-value {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5rem;
+            color: white;
+            margin: 10px 0 5px;
+        }
+        .stat-label {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .trend-up {
+            color: var(--success);
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .trend-down {
+            color: var(--danger);
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        /* Progress Bars */
+        .target-bar-bg {
+            background: rgba(255,255,255,0.05);
+            height: 8px;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 15px;
+        }
+        .target-bar-fill {
+            background: linear-gradient(90deg, #b8860b, var(--accent-gold));
+            height: 100%;
+            border-radius: 4px;
+            position: relative;
+        }
+        .target-bar-fill::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; bottom: 0; right: 0;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+            transform: translateX(-100%);
+            animation: shimmer 2s infinite;
+        }
+        @keyframes shimmer { 100% { transform: translateX(100%); } }
+
+        /* Store List */
+        .store-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px dashed rgba(255,255,255,0.1);
+        }
+        .store-row:last-child { border-bottom: none; }
+        
+        /* Leaderboard */
+        .leader {
+            display: flex;
+            align-items: center;
+            background: rgba(255,255,255,0.03);
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 10px;
+        }
+        .leader-rank {
+            font-family: 'Playfair Display';
+            font-size: 1.5rem;
+            color: var(--accent-gold);
+            width: 40px;
+            font-weight: bold;
+        }
+        
+        /* Threat Radar */
+        .threat-alert {
+            background: rgba(255, 71, 87, 0.1);
+            border-left: 3px solid var(--danger);
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
+        
+    </style>
+</head>
+<body>
+    <div class="container animate-fadeIn">
+        <header class="header">
+            <a href="index.html" class="logo">Aura<span>.</span> <sup style="font-size: 0.6rem; color: #888; font-family: 'Inter'; letter-spacing: 1px;">ENTERPRISE</sup></a>
+            <div class="flex items-center gap-4">
+                <span class="badge" style="background: rgba(212,175,55,0.1); color: var(--accent-gold); border: 1px solid var(--accent-gold);">HQ: Dubai</span>
+                <span>Welcome, <strong id="user-display-name">Regional Director</strong></span>
+                <a href="index.html" style="color: var(--danger); text-decoration: none; font-size: 0.9rem;">Logout</a>
+            </div>
+        </header>
+
+        <main>
+            <div class="flex justify-between items-center mb-6">
+                <div>
+                    <h2>Global Command Center</h2>
+                    <p style="color: var(--text-secondary);">Real-time revenue, inventory, and personnel analytics across all boutiques.</p>
+                </div>
+                <div class="flex gap-2">
+                    <button class="btn btn-secondary" style="border: 1px solid #333;">Export Q3 Report</button>
+                    <button class="btn btn-primary" onclick="alert('Syncing live data from 3 showrooms...')">Force Global Sync</button>
+                </div>
+            </div>
+
+            <!-- Top Line Metrics -->
+            <div class="grid-3 mb-6">
+                <div class="enterprise-card">
+                    <div class="stat-label">Total Pipeline Revenue (30 Days)</div>
+                    <div class="stat-value">₹14,50,00,000</div>
+                    <div class="trend-up">↑ 12.4% vs Last Month</div>
+                    <div class="target-bar-bg">
+                        <div class="target-bar-fill" style="width: 82%;"></div>
+                    </div>
+                    <div class="flex justify-between mt-2" style="font-size: 0.75rem; color: #888;">
+                        <span>Current</span>
+                        <span>Target: ₹18.0Cr</span>
+                    </div>
+                </div>
+                
+                <div class="enterprise-card">
+                    <div class="stat-label">Custom Deposits Secured</div>
+                    <div class="stat-value text-gold" style="color: var(--success);">₹3,25,00,000</div>
+                    <div class="trend-up">↑ 8.2% via Stripe Escrow</div>
+                    <div class="target-bar-bg">
+                        <div class="target-bar-fill" style="background: linear-gradient(90deg, #2ed573, #7bed9f); width: 100%;"></div>
+                    </div>
+                    <div class="flex justify-between mt-2" style="font-size: 0.75rem; color: #888;">
+                        <span>100% of required deposits captured</span>
+                    </div>
+                </div>
+
+                <div class="enterprise-card rounded-border" style="border-top-color: #555;">
+                    <div class="stat-label">Aura AI Auto-Captured Leads</div>
+                    <div class="stat-value" style="color: #ccc;">482</div>
+                    <div class="trend-up" style="color: var(--accent-gold);">✨ 142 from AR Try-On Mocks</div>
+                    <div class="target-bar-bg">
+                        <div class="target-bar-fill" style="background: #ccc; width: 65%;"></div>
+                    </div>
+                    <div class="flex justify-between mt-2" style="font-size: 0.75rem; color: #888;">
+                        <span>Zero Manual Entry</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid-2">
+                <!-- Multi-Store Heatmap -->
+                <section class="enterprise-card glass-panel" style="border-top: none;">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 style="margin:0;">🏬 Boutique Performance Map</h3>
+                        <span style="font-size: 0.8rem; color: var(--accent-gold);">Live Status</span>
+                    </div>
+                    
+                    <div class="store-row">
+                        <div>
+                            <strong style="color: white; font-size: 1.1rem;">Dubai - Flagship (Mall of Emirates)</strong>
+                            <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 4px;">12 Active Associates • 8 Custom Orders In-Workshop</div>
+                        </div>
+                        <div style="text-align: right;">
+                            <div style="color: var(--success); font-weight: bold; font-size: 1.1rem;">₹8.4 Cr</div>
+                            <div style="font-size: 0.75rem; color: #888;">112% to Target</div>
+                        </div>
+                    </div>
+                    
+                    <div class="store-row">
+                        <div>
+                            <strong style="color: white; font-size: 1.1rem;">Mumbai - Bandra West</strong>
+                            <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 4px;">8 Active Associates • 14 Upcoming Anniversaries</div>
+                        </div>
+                        <div style="text-align: right;">
+                            <div style="color: var(--accent-gold); font-weight: bold; font-size: 1.1rem;">₹4.1 Cr</div>
+                            <div style="font-size: 0.75rem; color: #888;">92% to Target</div>
+                        </div>
+                    </div>
+
+                    <div class="store-row">
+                        <div>
+                            <strong style="color: white; font-size: 1.1rem;">New Delhi - South Extension</strong>
+                            <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 4px;">5 Active Associates • AI OCR Captured: 40 Leads today</div>
+                        </div>
+                        <div style="text-align: right;">
+                            <div style="color: white; font-weight: bold; font-size: 1.1rem;">₹2.0 Cr</div>
+                            <div style="font-size: 0.75rem; color: #888;">85% to Target</div>
+                        </div>
+                    </div>
+                </section>
+
+                <div style="display: flex; flex-direction: column; gap: 24px;">
+                    <!-- Sales Leaderboard -->
+                    <section class="enterprise-card glass-panel" style="border-top: none; padding: 20px;">
+                        <h3 style="margin: 0 0 15px;">🏆 Weekly Top Closers</h3>
+                        
+                        <div class="leader">
+                            <div class="leader-rank">1</div>
+                            <div style="flex:1;">
+                                <strong style="color: white;">Aryan Patel</strong>
+                                <div style="font-size: 0.75rem; color: var(--text-secondary);">Dubai Flagship</div>
+                            </div>
+                            <div style="text-align: right;">
+                                <div style="color: var(--accent-gold); font-weight: bold;">₹1.2 Cr</div>
+                                <div style="font-size: 0.7rem; color: var(--success);">7 Escrows Secured</div>
+                            </div>
+                        </div>
+                        
+                        <div class="leader">
+                            <div class="leader-rank" style="color: #C0C0C0;">2</div>
+                            <div style="flex:1;">
+                                <strong style="color: white;">Sneha Rao</strong>
+                                <div style="font-size: 0.75rem; color: var(--text-secondary);">Mumbai Bandra</div>
+                            </div>
+                            <div style="text-align: right;">
+                                <div style="color: white; font-weight: bold;">₹85 Lakhs</div>
+                                <div style="font-size: 0.7rem; color: var(--success);">4 Escrows Secured</div>
+                            </div>
+                        </div>
+                    </section>
+                    
+                    <!-- Global Inventory Threat Radar -->
+                    <section class="enterprise-card glass-panel" style="border-top: none; padding: 20px;">
+                        <h3 style="margin: 0 0 15px; display: flex; align-items: center; gap: 8px;">
+                            <span style="display:inline-block; width:10px; height:10px; background:var(--danger); border-radius:50%; animation: pulse-danger 1.5s infinite;"></span>
+                            Inventory Threat Radar
+                        </h3>
+                        <style>@keyframes pulse-danger { 0% {box-shadow: 0 0 0 0 rgba(255,71,87,0.7);} 70%{box-shadow: 0 0 0 10px rgba(255,71,87,0);} 100%{box-shadow:0 0 0 0 rgba(255,71,87,0);}}</style>
+                        
+                        <div class="threat-alert">
+                            <strong style="color: white; display: block; margin-bottom: 4px;">Stock Depletion: Polki Chokers (22K)</strong>
+                            <span style="font-size: 0.85rem; color: #ccc;">Mumbai branch has completely sold out due to high AI Stylist recommendations. Transfer 5 units from Dubai.</span>
+                            <button class="btn btn-secondary mt-2" style="padding: 4px 10px; font-size: 0.75rem; border-color: rgba(255,255,255,0.2);">Authorize Logistics Transfer</button>
+                        </div>
+                        
+                        <div class="threat-alert" style="background: rgba(251, 207, 51, 0.05); border-color: var(--accent-gold);">
+                            <strong style="color: white; display: block; margin-bottom: 4px;">Margin Alert: Loose Diamonds (VVS1)</strong>
+                            <span style="font-size: 0.85rem; color: #ccc;">Global acquisition rate increased by 4% today. AI has automatically updated client live-pricing catalogs to protect margins.</span>
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Access - Aura</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid var(--glass-border);
+            margin-bottom: 24px;
+        }
+        .tab {
+            flex: 1;
+            text-align: center;
+            padding: 12px;
+            cursor: pointer;
+            color: var(--text-secondary);
+            font-weight: 600;
+            transition: 0.3s;
+        }
+        .tab.active {
+            color: var(--accent-gold);
+            border-bottom: 2px solid var(--accent-gold);
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s;
+        }
+    </style>
+
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#050505">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+</head>
+<body>
+    <div class="container animate-fadeIn">
+        <header class="header">
+            <a href="index.html" class="logo">Aura<span>.</span></a>
+        </header>
+
+        <main style="display: flex; justify-content: center; margin-top: 5vh;">
+            <div class="card glass-panel" style="width: 100%; max-width: 450px; padding: 40px;">
+                
+                <div class="tabs">
+                    <div class="tab active" onclick="switchTab('existing')">Existing Customer</div>
+                    <div class="tab" onclick="switchTab('new')">New Customer</div>
+                </div>
+
+                <!-- Existing Customer Login -->
+                <div id="existing-tab" class="tab-content active">
+                    <h2 class="text-center" style="font-size: 1.5rem;">Welcome Back</h2>
+                    <p class="text-center" style="color: var(--text-secondary); margin-bottom: 24px;">Login to view your notifications & suggestions.</p>
+                    
+                    <form id="customer-login-form">
+                        <div id="phone-step">
+                            <div class="input-group">
+                                <label>Registered Phone Number</label>
+                                <input type="tel" id="cPhone" required pattern="[0-9]{10}" title="Please enter a valid 10-digit phone number" placeholder="9876543210">
+                            </div>
+                            <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 10px;">Send OTP</button>
+                        </div>
+
+                        <div id="otp-step" style="display: none;">
+                            <div class="input-group">
+                                <label>Enter 4-Digit OTP sent to your phone</label>
+                                <input type="text" id="cOtp" pattern="[0-9]{4}" maxlength="4" placeholder="0000">
+                                <p style="font-size: 0.8rem; color: var(--accent-gold); margin-top: 5px;">Demo OTP: 1234</p>
+                            </div>
+                            <button type="button" onclick="verifyOtp()" class="btn btn-primary" style="width: 100%; margin-top: 10px;">Verify & Login</button>
+                            <button type="button" onclick="resetLogin()" class="btn btn-secondary" style="width: 100%; margin-top: 10px; border:none; font-size: 0.8rem;">Change Phone Number</button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- New Customer Registration -->
+                <div id="new-tab" class="tab-content">
+                    <h2 class="text-center" style="font-size: 1.5rem;">Join Aura</h2>
+                    <p class="text-center" style="color: var(--text-secondary); margin-bottom: 24px;">Register to connect with your jeweler.</p>
+                    
+                    <form id="customer-register-form">
+                        <div class="input-group">
+                            <label>Full Name</label>
+                            <input type="text" id="rName" required placeholder="Aditi Sharma">
+                        </div>
+                        <div class="input-group">
+                            <label>Phone Number</label>
+                            <input type="tel" id="rPhone" required pattern="[0-9]{10}" title="Please enter a valid 10-digit phone number" placeholder="9876543210">
+                        </div>
+                        <div class="input-group">
+                            <label>Email Address (Optional)</label>
+                            <input type="email" id="rEmail" placeholder="client@example.com">
+                        </div>
+                        <div class="input-group">
+                            <label>Jewelry Preferences</label>
+                            <input type="text" id="rPref" placeholder="Diamond Rings, Gold Chains">
+                        </div>
+                        <button type="submit" class="btn btn-secondary" style="width: 100%; margin-top: 10px;">Register & Enter</button>
+                    </form>
+                </div>
+
+            </div>
+        </main>
+    </div>
+    
+    <script src="js/app.js"></script>
+    <script>
+        function switchTab(tabId) {
+            // Update tabs
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            // Update content
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            document.getElementById(tabId + '-tab').classList.add('active');
+        }
+
+        // Login Handler
+        let currentCustomer = null;
+
+        document.getElementById('customer-login-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const phone = document.getElementById('cPhone').value;
+            const customers = getCustomers();
+            const exists = customers.find(c => c.phone === phone);
+            
+            if(exists) {
+                currentCustomer = exists;
+                // Simulate sending OTP
+                document.getElementById('phone-step').style.display = 'none';
+                document.getElementById('otp-step').style.display = 'block';
+                alert('OTP sent to ' + phone + '! (For demo, use 1234)');
+            } else {
+                alert('Account not found. Please register as a New Customer.');
+            }
+        });
+
+        function verifyOtp() {
+            const otp = document.getElementById('cOtp').value;
+            if(otp === '1234') {
+                localStorage.setItem('auth_role', 'customer');
+                localStorage.setItem('auth_customer_id', currentCustomer.id);
+                localStorage.setItem('auth_customer_name', currentCustomer.name);
+                window.location.href = 'customer.html';
+            } else {
+                alert('Invalid OTP. Please try again.');
+            }
+        }
+
+        function resetLogin() {
+            document.getElementById('phone-step').style.display = 'block';
+            document.getElementById('otp-step').style.display = 'none';
+            document.getElementById('cOtp').value = '';
+        }
+
+        // Register Handler
+        document.getElementById('customer-register-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const rPhone = document.getElementById('rPhone').value;
+            alert('Sending verification OTP to ' + rPhone + '...');
+            
+            const newCust = addCustomer(
+                document.getElementById('rName').value,
+                rPhone,
+                document.getElementById('rPref').value
+            );
+            
+            // Auto login after register
+            localStorage.setItem('auth_role', 'customer');
+            localStorage.setItem('auth_customer_id', newCust.id);
+            localStorage.setItem('auth_customer_name', newCust.name);
+            window.location.href = 'customer.html';
+        });
+    </script>
+
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js').then(reg => {
+                    console.log('SW registered!', reg);
+                }).catch(err => console.log('SW rep failed', err));
+            });
+        }
+    </script>
+</body>
+</html>
+
