@@ -172,7 +172,7 @@
 <body>
     <div class="container animate-fadeIn">
         <header class="header" style="display:flex; justify-content: space-between; align-items: center; padding-right: 20px;">
-            <a href="index.html" class="logo">Aura<span>.</span></a>
+            <a href="index.html" class="logo notranslate">Aura<span>.</span></a>
             <div id="google_translate_element" style="margin-left: auto; margin-right: 20px;"></div>
             <div class="flex items-center gap-4">
                 <div style="position: relative;">
@@ -704,7 +704,7 @@
 
             <!-- UI controls -->
             <button onclick="closeARView()" style="position: absolute; top: 30px; left: 20px; background: rgba(0,0,0,0.5); border: 1px solid var(--accent-gold); color: white; width: 40px; height: 40px; border-radius: 50%; font-size: 1.5rem; display:flex; align-items:center; justify-content:center; cursor: pointer; z-index: 2;">&times;</button>
-            <div style="position: absolute; top: 30px; right: 20px; background: rgba(0,0,0,0.5); padding: 8px 15px; border-radius: 20px; border: 1px solid var(--accent-gold); color: var(--accent-gold); font-size: 0.8rem; z-index: 2;">✨ Aura AI Active</div>
+            <div style="position: absolute; top: 30px; right: 20px; background: rgba(0,0,0,0.5); padding: 8px 15px; border-radius: 20px; border: 1px solid var(--accent-gold); color: var(--accent-gold); font-size: 0.8rem; z-index: 2;" class="notranslate">✨ Aura AI Active</div>
             
             <button onclick="snapARPhoto()" style="position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%); width: 70px; height: 70px; border-radius: 50%; background: var(--accent-gold); border: 4px solid white; cursor: pointer; z-index: 2; box-shadow: 0 0 20px rgba(212,175,55,0.5);"></button>
             <p style="position: absolute; bottom: 10px; width: 100%; text-align: center; color: white; font-size: 0.8rem;">Tap to Capture Try-On</p>
@@ -795,7 +795,7 @@
         <div style="background: linear-gradient(90deg, #111, #222); padding: 15px 20px; border-bottom: 1px solid rgba(212,175,55,0.3); display: flex; justify-content: space-between; align-items: center;">
             <div style="display: flex; align-items: center; gap: 10px;">
                 <div style="width: 10px; height: 10px; background: var(--success); border-radius: 50%; box-shadow: 0 0 10px var(--success);"></div>
-                <h3 style="margin: 0; color: white; font-family: 'Playfair Display'; font-size: 1.1rem;">Aura AI Concierge</h3>
+                <h3 style="margin: 0; color: white; font-family: 'Playfair Display'; font-size: 1.1rem;" class="notranslate">Aura AI Concierge</h3>
             </div>
             <button onclick="toggleChat()" style="background: none; border: none; color: #888; font-size: 1.2rem; cursor: pointer;">&times;</button>
         </div>
@@ -859,7 +859,7 @@
             // Show typing indicator
             const chat = document.getElementById('chat-messages');
             const typingId = 'typing-' + Date.now();
-            chat.innerHTML += `<div id="${typingId}" style="align-self: flex-start; color: var(--accent-gold); font-size: 0.8rem; font-style: italic;">Aura AI is thinking...</div>`;
+            chat.innerHTML += `<div id="${typingId}" style="align-self: flex-start; color: var(--accent-gold); font-size: 0.8rem; font-style: italic;" class="notranslate">Aura AI is thinking...</div>`;
             chat.scrollTop = chat.scrollHeight;
             
             // Simple logic routing
