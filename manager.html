@@ -117,8 +117,9 @@
 </head>
 <body>
     <div class="container animate-fadeIn">
-        <header class="header">
+        <header class="header" style="display:flex; justify-content: space-between; align-items: center; padding-right: 20px;">
             <a href="index.html" class="logo">Aura<span>.</span> <sup style="font-size: 0.6rem; color: #888; font-family: 'Inter'; letter-spacing: 1px;">ENTERPRISE</sup></a>
+            <div id="google_translate_element" style="margin-left: auto; margin-right: 20px;"></div>
             <div class="flex items-center gap-4">
                 <span class="badge" style="background: rgba(212,175,55,0.1); color: var(--accent-gold); border: 1px solid var(--accent-gold);">HQ: Dubai</span>
                 <span>Welcome, <strong id="user-display-name">Regional Director</strong></span>
@@ -273,5 +274,11 @@
             </div>
         </main>
     </div>
+    <script type="text/javascript">
+        function googleTranslateElementInit() {
+          new google.translate.TranslateElement({pageLanguage: 'en', includedLanguages: 'en,hi,mr,gu,ta,te', layout: google.translate.TranslateElement.InlineLayout.SIMPLE, autoDisplay: false}, 'google_translate_element');
+        }
+    </script>
+    <script type="text/javascript" src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 </body>
 </html>
