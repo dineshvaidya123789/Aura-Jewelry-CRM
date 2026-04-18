@@ -58,6 +58,8 @@
                     <h2 class="text-center" style="font-size: 1.5rem;">Welcome Back</h2>
                     <p class="text-center" style="color: var(--text-secondary); margin-bottom: 24px;">Login to view your notifications & suggestions.</p>
                     
+                    <div id="login-error" style="display: none; background: rgba(255, 71, 87, 0.1); border: 1px solid var(--danger); color: white; padding: 12px; border-radius: 8px; margin-bottom: 20px; font-size: 0.9rem; text-align: center;"></div>
+                    
                     <form id="customer-login-form">
                         <div id="phone-step">
                             <div class="input-group">
@@ -114,8 +116,11 @@
         function switchTab(tabId) {
             // Update tabs
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            event.target.classList.add('active');
+            if (window.event) window.event.target.classList.add('active');
             
+            // Clear errors
+            document.getElementById('login-error').style.display = 'none';
+
             // Update content
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
             document.getElementById(tabId + '-tab').classList.add('active');
@@ -135,9 +140,13 @@
                 // Simulate sending OTP
                 document.getElementById('phone-step').style.display = 'none';
                 document.getElementById('otp-step').style.display = 'block';
+                document.getElementById('login-error').style.display = 'none';
+                // We keep the alert for the OTP code, but the UI change is visible
                 alert('OTP sent to ' + phone + '! (For demo, use 1234)');
             } else {
-                alert('Account not found. Please register as a New Customer.');
+                const errorBox = document.getElementById('login-error');
+                errorBox.innerText = 'Account not found. Please register as a New Customer below.';
+                errorBox.style.display = 'block';
             }
         });
 

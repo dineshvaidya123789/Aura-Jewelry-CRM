@@ -8,7 +8,8 @@ const initializeDB = () => {
 
         localStorage.setItem('jeweler_customers', JSON.stringify([
             { id: 1, name: 'Aditi Sharma', phone: '9876543210', lastVisit: '2023-11-15', pref: 'Gold Necklaces', source: 'walkin', eventDate: eventDateStr, eventType: '10th Anniversary' },
-            { id: 2, name: 'Rahul Desai', phone: '9123456780', lastVisit: '2023-12-05', pref: 'Wedding Rings', source: 'walkin', eventDate: null }
+            { id: 2, name: 'Rahul Desai', phone: '9123456780', lastVisit: '2023-12-05', pref: 'Wedding Rings', source: 'walkin', eventDate: null },
+            { id: 3, name: 'Aditi Sharma (Dev)', phone: '9987917394', lastVisit: '2024-04-18', pref: 'High-End Polki', source: 'walkin', eventDate: null }
         ]));
     }
     if (!localStorage.getItem('jeweler_notifications')) {
